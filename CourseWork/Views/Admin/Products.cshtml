@@ -1,0 +1,74 @@
+@model IEnumerable<Product>
+@{
+    ViewData["Title"] = "Управління товарами";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="container fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Управління товарами</h1>
+        <a asp-action="CreateProduct" class="btn btn-primary">Додати товар</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Зображення</th>
+                    <th>Назва</th>
+                    <th>Опис</th>
+                    <th>Ціна</th>
+                    <th>Категорія</th>
+                    <th>Мітки</th>
+                    <th>Дії</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model)
+                {
+                    <tr>
+                        <td>@product.Id</td>
+                        <td><img src="@product.ImageUrl" alt="@product.Name" style="width: 60px; height: 60px; object-fit: cover;" class="rounded"></td>
+                        <td>@product.Name</td>
+                        <td>@(product.Description.Length > 50 ? product.Description.Substring(0, 50) + "..." : product.Description)</td>
+                        <td>@product.Price.ToString("0.00") ₴</td>
+                        <td>@product.Category?.Name</td>
+                        <td>
+                            @if (product.IsNew)
+                            {
+                                <span class="badge bg-primary">Новинка</span>
+                            }
+                            @if (product.IsBestSeller)
+                            {
+                                <span class="badge bg-danger">Хіт продаж</span>
+                            }
+                            @if (!product.IsNew && !product.IsBestSeller)
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="EditProduct" asp-route-id="@product.Id" class="btn btn-sm btn-warning">Редагувати</a>
+                            <form asp-action="DeleteProduct" asp-route-id="@product.Id" method="post" class="d-inline" onsubmit="return confirm('Ви впевнені, що хочете видалити цей товар?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Видалити</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

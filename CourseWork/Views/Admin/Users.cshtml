@@ -1,0 +1,84 @@
+@model IEnumerable<ApplicationUser>
+@{
+    ViewData["Title"] = "Управління користувачами";
+    var userRoles = ViewBag.UserRoles as Dictionary<string, List<string>>;
+    var allRoles = ViewBag.AllRoles as List<string>;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="container fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Управління користувачами</h1>
+        <a asp-action="Index" class="btn btn-secondary">Назад до панелі</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Повне ім'я</th>
+                    <th>Адреса</th>
+                    <th>Ролі</th>
+                    <th>Дії</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    var roles = userRoles?.ContainsKey(user.Id) == true ? userRoles[user.Id] : new List<string>();
+                    var isAdmin = roles.Contains("Admin");
+                    <tr>
+                        <td>@user.Id</td>
+                        <td>@user.Email</td>
+                        <td>@(user.FullName ?? "Не вказано")</td>
+                        <td>@(user.Address ?? "Не вказано")</td>
+                        <td>
+                            @if (isAdmin)
+                            {
+                                <span class="badge bg-danger">Адміністратор</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Користувач</span>
+                            }
+                        </td>
+                        <td>
+                            <form asp-action="ToggleAdminRole" method="post" class="d-inline">
+                                <input type="hidden" name="userId" value="@user.Id" />
+                                <input type="hidden" name="isAdmin" value="@(!isAdmin)" />
+                                @if (isAdmin)
+                                {
+                                    <button type="submit" class="btn btn-sm btn-warning" 
+                                            onclick="return confirm('Ви впевнені, що хочете забрати права адміністратора у цього користувача?');">
+                                        Забрати права адміна
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-sm btn-success"
+                                            onclick="return confirm('Ви впевнені, що хочете надати права адміністратора цьому користувачу?');">
+                                        Зробити адміном
+                                    </button>
+                                }
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

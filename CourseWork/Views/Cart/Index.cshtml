@@ -1,0 +1,88 @@
+@model List<CartItem>
+@{
+    ViewData["Title"] = "Кошик";
+    var total = Model.Sum(c => c.Price * c.Quantity);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cart.css" asp-append-version="true" />
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="container fade-in">
+    <h1 class="mb-4 cart-header">Кошик</h1>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-striped cart-table">
+                <thead>
+                    <tr>
+                        <th>Зображення</th>
+                        <th>Назва</th>
+                        <th>Ціна</th>
+                        <th>Кількість</th>
+                        <th>Сума</th>
+                        <th>Дії</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <img src="@item.ImageUrl" alt="@item.Name" class="cart-item-image" style="width: 80px; height: 80px; object-fit: cover;">
+                            </td>
+                            <td class="cart-item-name">@item.Name</td>
+                            <td class="cart-item-price">@item.Price.ToString("0.00") ₴</td>
+                            <td>
+                                <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" class="d-inline">
+                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <input type="number" name="quantity" value="@item.Quantity" min="1" class="quantity-input" onchange="this.form.submit()">
+                                </form>
+                            </td>
+                            <td class="cart-item-price">@((item.Price * item.Quantity).ToString("0.00")) ₴</td>
+                            <td>
+                                <form asp-controller="Cart" asp-action="RemoveFromCart" method="post" class="d-inline">
+                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <button type="submit" class="btn btn-danger btn-sm">Видалити</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-end"><strong>Всього до сплати:</strong></td>
+                        <td class="total-amount"><strong>@total.ToString("0.00") ₴</strong></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="cart-actions">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Продовжити покупки</a>
+            <a asp-controller="Order" asp-action="Checkout" class="btn btn-success">Оформити замовлення</a>
+        </div>
+    }
+    else
+    {
+        <div class="empty-cart">
+            <p>Ваш кошик порожній</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Перейти до меню</a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/cart.js" asp-append-version="true"></script>
+}
+

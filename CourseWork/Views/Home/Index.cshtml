@@ -1,0 +1,116 @@
+﻿@model IEnumerable<Product>
+@{
+    ViewData["Title"] = "Головна";
+    var categories = ViewBag.Categories as List<Category>;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 9999;" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="container fade-in">
+    <h1 class="text-center mb-4 menu-header">Меню</h1>
+
+    <!-- Search Bar -->
+    <div class="mb-4 search-container">
+        <form asp-action="Index" method="get" class="search-form">
+            <div class="search-wrapper">
+                <div class="search-input-wrapper">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    </svg>
+                    <input type="text" name="searchTerm" class="form-control search-input" placeholder="Пошук по назві товару..." value="@ViewBag.SearchTerm" autocomplete="off" />
+                </div>
+                <select name="categoryId" class="form-select category-select">
+                    <option value="">Всі категорії</option>
+                    @if (categories != null)
+                    {
+                        @foreach (var category in categories)
+                        {
+                            <option value="@category.Id" selected="@(ViewBag.SelectedCategoryId?.ToString() == category.Id.ToString())">
+                                @category.Name
+                            </option>
+                        }
+                    }
+                </select>
+                <button type="submit" class="btn btn-primary search-btn">
+                    <span>Пошук</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Category Filters -->
+    <div class="mb-4 category-filters">
+        <div class="btn-group" role="group">
+            <a href="@Url.Action("Index", "Home", new { searchTerm = ViewBag.SearchTerm })" 
+               class="btn btn-outline-primary @(ViewBag.SelectedCategoryId == null ? "active" : "")">
+                Всі
+            </a>
+            @if (categories != null)
+            {
+                @foreach (var category in categories)
+                {
+                    <a href="@Url.Action("Index", "Home", new { categoryId = category.Id, searchTerm = ViewBag.SearchTerm })" 
+                       class="btn btn-outline-primary @(ViewBag.SelectedCategoryId?.ToString() == category.Id.ToString() ? "active" : "")">
+                        @category.Name
+                    </a>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="row">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var product in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm product-card">
+                        <div class="product-image-wrapper">
+                            <img src="@product.ImageUrl" class="card-img-top" alt="@product.Name" style="height: 250px; object-fit: cover;">
+                            <div class="product-badges">
+                                @if (product.IsNew)
+                                {
+                                    <span class="badge badge-new">Новинка</span>
+                                }
+                                @if (product.IsBestSeller)
+                                {
+                                    <span class="badge badge-bestseller">Хіт продаж</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@product.Name</h5>
+                            <p class="card-text flex-grow-1">@product.Description</p>
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <h4 class="text-primary mb-0 product-price">@product.Price.ToString("0.00") ₴</h4>
+                                <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline add-to-cart-form" data-product-id="@product.Id" data-product-name="@product.Name">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@product.Id" />
+                                    <input type="hidden" name="quantity" value="1" />
+                                    <button type="submit" class="btn btn-primary add-to-cart-btn">В кошик</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <p class="text-center text-muted empty-products">Товари не знайдено</p>
+            </div>
+        }
+    </div>
+</div>

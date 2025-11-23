@@ -1,0 +1,57 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Оформлення замовлення";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/order.css" asp-append-version="true" />
+}
+
+<div class="container fade-in">
+    <h1 class="mb-4 checkout-header">Оформлення замовлення</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="PlaceOrder" method="post" class="checkout-form">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Помилка!</strong>
+                        <div asp-validation-summary="All" class="mb-0"></div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label asp-for="CustomerName" class="form-label"></label>
+                    <input asp-for="CustomerName" class="form-control" placeholder="Введіть ваше ім'я" required />
+                    <span asp-validation-for="CustomerName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CustomerPhone" class="form-label"></label>
+                    <input asp-for="CustomerPhone" class="form-control" placeholder="+380XXXXXXXXX або 0XXXXXXXXX" type="tel" required />
+                    <small class="form-text text-muted">Формат: +380XXXXXXXXX або 0XXXXXXXXX</small>
+                    <span asp-validation-for="CustomerPhone" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CustomerAddress" class="form-label"></label>
+                    <textarea asp-for="CustomerAddress" class="form-control" rows="3" placeholder="Введіть повну адресу доставки" required></textarea>
+                    <span asp-validation-for="CustomerAddress" class="text-danger"></span>
+                </div>
+
+                <div class="checkout-actions">
+                    <button type="submit" class="btn btn-primary">Перейти до оплати</button>
+                    <a asp-controller="Cart" asp-action="Index" class="btn btn-secondary">Назад до кошика</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/checkout.js" asp-append-version="true"></script>
+}
+

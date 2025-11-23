@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "Адмін-панель";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="container fade-in">
+    <h1 class="mb-4">Адмін-панель</h1>
+
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card admin-stat-card">
+                <div class="card-body text-center">
+                    <h2 class="text-primary">@ViewBag.ProductsCount</h2>
+                    <p class="mb-0">Товарів</p>
+                    <a asp-action="Products" class="btn btn-sm btn-outline-primary mt-2">Управління</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card admin-stat-card">
+                <div class="card-body text-center">
+                    <h2 class="text-success">@ViewBag.CategoriesCount</h2>
+                    <p class="mb-0">Категорій</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card admin-stat-card">
+                <div class="card-body text-center">
+                    <h2 class="text-info">@ViewBag.OrdersCount</h2>
+                    <p class="mb-0">Замовлень</p>
+                    <a asp-action="Orders" class="btn btn-sm btn-outline-info mt-2">Переглянути</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card admin-stat-card">
+                <div class="card-body text-center">
+                    <h2 class="text-warning">@ViewBag.TotalRevenue.ToString("0.00") ₴</h2>
+                    <p class="mb-0">Доход</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Products" class="btn btn-primary me-2">Управління товарами</a>
+        <a asp-action="Orders" class="btn btn-info me-2">Управління замовленнями</a>
+        <a asp-action="Users" class="btn btn-success">Управління користувачами</a>
+    </div>
+</div>
+

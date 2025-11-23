@@ -1,0 +1,66 @@
+@model IEnumerable<Order>
+@{
+    ViewData["Title"] = "Управління замовленнями";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="container fade-in">
+    <h1 class="mb-4">Управління замовленнями</h1>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Клієнт</th>
+                    <th>Телефон</th>
+                    <th>Адреса</th>
+                    <th>Сума</th>
+                    <th>Статус</th>
+                    <th>Дата</th>
+                    <th>Дії</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model.OrderByDescending(o => o.OrderDate))
+                {
+                    <tr>
+                        <td>#@order.Id</td>
+                        <td>@order.CustomerName</td>
+                        <td>@order.CustomerPhone</td>
+                        <td>@order.CustomerAddress</td>
+                        <td>@order.TotalAmount.ToString("0.00") ₴</td>
+                        <td>
+                            <span class="badge @(order.OrderStatus == "Paid" ? "bg-success" : order.OrderStatus == "Completed" ? "bg-info" : "bg-warning")">
+                                @order.OrderStatus
+                            </span>
+                        </td>
+                        <td>@order.OrderDate.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>
+                            <form asp-action="UpdateOrderStatus" method="post" class="d-inline">
+                                <input type="hidden" name="orderId" value="@order.Id" />
+                                <select name="status" class="form-select form-select-sm d-inline-block" style="width: auto;" onchange="this.form.submit()">
+                                    <option value="Pending" selected="@(order.OrderStatus == "Pending")">Очікує</option>
+                                    <option value="Paid" selected="@(order.OrderStatus == "Paid")">Оплачено</option>
+                                    <option value="Completed" selected="@(order.OrderStatus == "Completed")">Завершено</option>
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

@@ -1,0 +1,154 @@
+/* Стилі для сторінки кошика */
+
+.cart-header {
+    margin-bottom: 2rem;
+    color: #2c3e50;
+}
+
+
+.cart-table {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    animation: fadeIn 0.6s ease;
+}
+
+.cart-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.cart-table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.cart-table thead {
+    background-color: #f8f9fa;
+}
+
+.cart-table thead th {
+    font-weight: 600;
+    color: #2c3e50;
+    border-bottom: 2px solid #dee2e6;
+    padding: 1rem;
+}
+
+.cart-table tbody td {
+    vertical-align: middle;
+    padding: 1rem;
+}
+
+.cart-item-image {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cart-item-name {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.cart-item-price {
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+.quantity-input {
+    width: 80px;
+    text-align: center;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    padding: 0.375rem 0.5rem;
+}
+
+.quantity-input:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.cart-table tfoot {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.cart-table tfoot td {
+    padding: 1rem;
+    font-size: 1.1rem;
+}
+
+.total-amount {
+    color: #0d6efd;
+    font-size: 1.3rem;
+}
+
+.cart-actions {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.cart-actions .btn {
+    padding: 0.75rem 2rem;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.cart-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.empty-cart {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-cart p {
+    color: #6c757d;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.empty-cart .btn {
+    border-radius: 25px;
+    padding: 0.75rem 2rem;
+}
+
+.btn-danger {
+    border-radius: 5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-danger::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+}
+
+.btn-danger:hover::before {
+    width: 200px;
+    height: 200px;
+}
+
+.btn-danger:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.btn-danger:active {
+    transform: scale(0.95);
+}
+
