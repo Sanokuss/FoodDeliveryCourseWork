@@ -3,64 +3,101 @@
     ViewData["Title"] = "Реєстрація";
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/order.css" asp-append-version="true" />
-}
-
-<div class="container fade-in">
+<div class="container fade-in py-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h1 class="text-center mb-4 checkout-header">Реєстрація</h1>
-            <form asp-action="Register" method="post" class="checkout-form">
-                @if (!ViewData.ModelState.IsValid)
-                {
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong>Помилка!</strong>
-                        <div asp-validation-summary="All" class="mb-0"></div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="col-md-5">
+            <div class="glass-card">
+                <h1 class="auth-header">Реєстрація</h1>
+                <form asp-action="Register" method="post" id="registerForm">
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label text-muted">Повне Ім'я</label>
+                        <input asp-for="FullName" class="form-control" placeholder="Іван Іванов" required 
+                               style="background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 12px; padding: 12px;" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
                     </div>
-                }
 
-                <div class="mb-3">
-                    <label asp-for="FullName" class="form-label"></label>
-                    <input asp-for="FullName" class="form-control" placeholder="Введіть ваше повне ім'я" required />
-                    <span asp-validation-for="FullName" class="text-danger"></span>
-                </div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label text-muted">Email</label>
+                        <input asp-for="Email" class="form-control" type="email" placeholder="example@email.com" required 
+                               style="background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 12px; padding: 12px;" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
 
-                <div class="mb-3">
-                    <label asp-for="Email" class="form-label"></label>
-                    <input asp-for="Email" class="form-control" type="email" placeholder="example@email.com" required />
-                    <span asp-validation-for="Email" class="text-danger"></span>
-                </div>
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label text-muted">Адреса (опціонально)</label>
+                        <input asp-for="Address" class="form-control" placeholder="Вулиця, буд..." 
+                               style="background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 12px; padding: 12px;" />
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
 
-                <div class="mb-3">
-                    <label asp-for="Address" class="form-label"></label>
-                    <input asp-for="Address" class="form-control" placeholder="Введіть адресу (необов'язково)" />
-                    <span asp-validation-for="Address" class="text-danger"></span>
-                </div>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label text-muted">Пароль</label>
+                        <input asp-for="Password" class="form-control" type="password" placeholder="******" required 
+                               style="background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 12px; padding: 12px;" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
 
-                <div class="mb-3">
-                    <label asp-for="Password" class="form-label"></label>
-                    <input asp-for="Password" class="form-control" type="password" placeholder="Мінімум 6 символів" required />
-                    <span asp-validation-for="Password" class="text-danger"></span>
-                </div>
+                    <div class="mb-4">
+                        <label asp-for="ConfirmPassword" class="form-label text-muted">Підтвердження</label>
+                        <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="******" required 
+                               style="background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 12px; padding: 12px;" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
 
-                <div class="mb-3">
-                    <label asp-for="ConfirmPassword" class="form-label"></label>
-                    <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="Підтвердіть пароль" required />
-                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-                </div>
-
-                <div class="checkout-actions">
-                    <button type="submit" class="btn btn-primary">Зареєструватися</button>
-                    <a asp-action="Login" class="btn btn-secondary">Вже маєте акаунт? Увійти</a>
-                </div>
-            </form>
+                    <div class="d-grid gap-3">
+                        <button type="submit" class="btn btn-primary" style="border-radius: 12px; padding: 12px; font-weight: 600; background: var(--primary-color); border: none;">Створити акаунт</button>
+                        <a asp-action="Login" class="btn btn-outline-secondary" style="border-radius: 12px; padding: 12px; border-color: var(--border-color); color: var(--text-muted);">Вже є акаунт? Увійти</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+    <script>
+        // Server-side errors to Toasts
+        $(document).ready(function() {
+            @if (!ViewData.ModelState.IsValid)
+            {
+                var errors = ViewData.ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                
+                foreach (var error in errors)
+                {
+                    var escapedError = Html.Raw(System.Text.Json.JsonSerializer.Serialize(error));
+                    @:setTimeout(function() { if (typeof showToast === 'function') { showToast(@escapedError, 'error', 8000); } else { alert(@escapedError); } }, 500);
+                }
+            }
+        });
 
+        // Client-side validation to Toasts
+        var defaultHighlight = $.validator.defaults.highlight;
+        var defaultUnhighlight = $.validator.defaults.unhighlight;
+
+        $.validator.setDefaults({
+            showErrors: function(errorMap, errorList) {
+                this.defaultShowErrors(); // Keep default span behavior
+                
+                // Show only the first error as a toast to avoid spam
+                if (errorList.length > 0) {
+                    var firstError = errorList[0];
+                    // Check if we haven't shown this toast recently (debounce)
+                    var key = firstError.element.name + firstError.message;
+                    var lastTime = $(firstError.element).data('last-toast');
+                    var now = new Date().getTime();
+                    
+                    if (!lastTime || now - lastTime > 3000) {
+                        if (typeof showToast === 'function') {
+                            showToast(firstError.message, 'warning');
+                        }
+                        $(firstError.element).data('last-toast', now);
+                    }
+                }
+            }
+        });
+    </script>
+}

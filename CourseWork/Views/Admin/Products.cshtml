@@ -4,71 +4,69 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <!-- No extra css needed -->
 }
 
-<div class="container fade-in">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Управління товарами</h1>
-        <a asp-action="CreateProduct" class="btn btn-primary">Додати товар</a>
+<div class="container fade-in py-5">
+    <div class="glass-card mb-4 d-flex justify-content-between align-items-center">
+        <h1 class="m-0" style="font-size: 1.8rem;">Управління товарами</h1>
+        <a asp-action="CreateProduct" class="btn btn-primary rounded-pill px-4">+ Додати товар</a>
     </div>
 
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 12px;">
             @TempData["Success"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
 
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Зображення</th>
-                    <th>Назва</th>
-                    <th>Опис</th>
-                    <th>Ціна</th>
-                    <th>Категорія</th>
-                    <th>Мітки</th>
-                    <th>Дії</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var product in Model)
-                {
+    <div class="glass-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0" style="--bs-table-bg: transparent;">
+                <thead style="background: rgba(255,255,255,0.05);">
                     <tr>
-                        <td>@product.Id</td>
-                        <td><img src="@product.ImageUrl" alt="@product.Name" style="width: 60px; height: 60px; object-fit: cover;" class="rounded"></td>
-                        <td>@product.Name</td>
-                        <td>@(product.Description.Length > 50 ? product.Description.Substring(0, 50) + "..." : product.Description)</td>
-                        <td>@product.Price.ToString("0.00") ₴</td>
-                        <td>@product.Category?.Name</td>
-                        <td>
-                            @if (product.IsNew)
-                            {
-                                <span class="badge bg-primary">Новинка</span>
-                            }
-                            @if (product.IsBestSeller)
-                            {
-                                <span class="badge bg-danger">Хіт продаж</span>
-                            }
-                            @if (!product.IsNew && !product.IsBestSeller)
-                            {
-                                <span class="text-muted">-</span>
-                            }
-                        </td>
-                        <td>
-                            <a asp-action="EditProduct" asp-route-id="@product.Id" class="btn btn-sm btn-warning">Редагувати</a>
-                            <form asp-action="DeleteProduct" asp-route-id="@product.Id" method="post" class="d-inline" onsubmit="return confirm('Ви впевнені, що хочете видалити цей товар?');">
-                                <button type="submit" class="btn btn-sm btn-danger">Видалити</button>
-                            </form>
-                        </td>
+                        <th class="p-3 border-bottom border-secondary">ID</th>
+                        <th class="p-3 border-bottom border-secondary">Зображення</th>
+                        <th class="p-3 border-bottom border-secondary">Назва</th>
+                        <th class="p-3 border-bottom border-secondary">Опис</th>
+                        <th class="p-3 border-bottom border-secondary">Ціна</th>
+                        <th class="p-3 border-bottom border-secondary">Категорія</th>
+                        <th class="p-3 border-bottom border-secondary">Мітки</th>
+                        <th class="p-3 border-bottom border-secondary">Дії</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var product in Model)
+                    {
+                        <tr>
+                            <td class="p-3 align-middle">@product.Id</td>
+                            <td class="p-3 align-middle"><img src="@product.ImageUrl" alt="@product.Name" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;" class="shadow-sm"></td>
+                            <td class="p-3 align-middle fw-bold">@product.Name</td>
+                            <td class="p-3 align-middle small">@(product.Description.Length > 50 ? product.Description.Substring(0, 50) + "..." : product.Description)</td>
+                            <td class="p-3 align-middle text-primary fw-bold">@product.Price.ToString("0.00") ₴</td>
+                            <td class="p-3 align-middle"><span class="badge bg-secondary rounded-pill">@product.Category?.Name</span></td>
+                            <td class="p-3 align-middle">
+                                @if (product.IsNew)
+                                {
+                                    <span class="badge bg-info text-dark rounded-pill me-1">New</span>
+                                }
+                                @if (product.IsBestSeller)
+                                {
+                                    <span class="badge bg-warning text-dark rounded-pill">Hit</span>
+                                }
+                            </td>
+                            <td class="p-3 align-middle">
+                                <a asp-action="EditProduct" asp-route-id="@product.Id" class="btn btn-sm btn-outline-warning rounded-pill me-1">✏️</a>
+                                <form asp-action="DeleteProduct" asp-route-id="@product.Id" method="post" class="d-inline" onsubmit="return confirm('Ви впевнені?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">🗑️</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 

@@ -5,20 +5,19 @@ namespace CourseWork.ViewModels
 {
     public class CheckoutViewModel
     {
-        [Required(ErrorMessage = "Ім'я обов'язкове")]
-        [StringLength(100, MinimumLength = 2, ErrorMessage = "Ім'я повинно містити від 2 до 100 символів")]
+        [Required(ErrorMessage = "Кур'єр питатиме: \"А для кого це?\" Введіть ім'я! 📦")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Ім'я занадто коротке чи довге! Від 2 до 100 символів 📏")]
         [Display(Name = "Ім'я")]
         public string CustomerName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Телефон обов'язковий")]
+        [Required(ErrorMessage = "Телефон потрібен! Як інакше кур'єр вам зателефонує? 📞")]
         [Display(Name = "Телефон")]
-        [UkrainianPhone(ErrorMessage = "Невірний формат телефону. Використовуйте формат: +380XXXXXXXXX або 0XXXXXXXXX")]
+        [UkrainianPhone(ErrorMessage = "Телефон якийсь дивний... +380XXXXXXXXX, будь ласка! 📱")]
         public string CustomerPhone { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Адреса обов'язкова")]
-        [StringLength(200, MinimumLength = 10, ErrorMessage = "Адреса повинна містити від 10 до 200 символів")]
+        [Required(ErrorMessage = "Куди везти смаколики? Вкажіть адресу! 🏠")]
+        [StringLength(200, MinimumLength = 10, ErrorMessage = "Адреса занадто коротка — кур'єр заблукає! 🗺️")]
         [Display(Name = "Адреса доставки")]
         public string CustomerAddress { get; set; } = string.Empty;
     }
 }
-

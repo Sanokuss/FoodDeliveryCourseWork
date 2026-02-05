@@ -77,7 +77,7 @@ namespace CourseWork.Controllers
                     return RedirectToAction("Index", "Home");
                 }
 
-                ModelState.AddModelError(string.Empty, "Невірний email або пароль");
+                ModelState.AddModelError(string.Empty, "Упс! Email або пароль хибний. Може, кіт по клавіатурі прогулявся? 🐱");
             }
             return View(model);
         }

@@ -1,0 +1,27 @@
+@model CourseWork.Models.Restaurant
+
+@{
+    ViewData["Title"] = "Видалити ресторан";
+}
+
+<div class="container mt-4">
+    <div class="alert alert-danger">
+        <h3>Ви впевнені, що хочете видалити цей ресторан?</h3>
+        <p>Це також може вплинути на продукти, пов'язані з ним.</p>
+    </div>
+
+    <div class="card mb-4" style="max-width: 500px;">
+        <img src="@Model.LogoUrl" class="card-img-top" alt="@Model.Name" style="height: 250px; object-fit: cover;">
+        <div class="card-body">
+            <h4 class="card-title">@Model.Name</h4>
+            <p class="card-text">@Model.Description</p>
+            <p class="card-text"><strong>Адреса:</strong> @Model.Address</p>
+        </div>
+    </div>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Видалити" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>

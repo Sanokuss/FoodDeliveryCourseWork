@@ -59,6 +59,7 @@ namespace CourseWork.Controllers
         {
             var categories = _categoryRepo.GetAll();
             ViewBag.Categories = categories;
+            ViewBag.Restaurants = _db.Restaurants.ToList();
             return View();
         }
 
@@ -75,6 +76,7 @@ namespace CourseWork.Controllers
             }
             var categories = _categoryRepo.GetAll();
             ViewBag.Categories = categories;
+            ViewBag.Restaurants = _db.Restaurants.ToList();
             return View(product);
         }
 
@@ -88,6 +90,7 @@ namespace CourseWork.Controllers
             }
             var categories = _categoryRepo.GetAll();
             ViewBag.Categories = categories;
+            ViewBag.Restaurants = _db.Restaurants.ToList();
             return View(product);
         }
 
@@ -104,6 +107,7 @@ namespace CourseWork.Controllers
             }
             var categories = _categoryRepo.GetAll();
             ViewBag.Categories = categories;
+            ViewBag.Restaurants = _db.Restaurants.ToList();
             return View(product);
         }
 

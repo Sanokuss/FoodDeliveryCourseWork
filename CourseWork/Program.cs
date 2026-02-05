@@ -29,8 +29,12 @@ namespace CourseWork
             });
 
             // Add DbContext
+            // builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            //    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+            
+            // Use InMemory Database for Testing/Preview
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseInMemoryDatabase("FoodDeliveryDb"));
 
             // Add Identity
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -47,7 +51,8 @@ namespace CourseWork
                 options.SignIn.RequireConfirmedEmail = false;
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddErrorDescriber<CourseWork.Utility.UkrainianIdentityErrorDescriber>();
 
             // Register Repositories
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

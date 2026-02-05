@@ -3,53 +3,54 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <!-- No extra css needed, using site.css -->
 }
 
-<div class="container fade-in">
-    <h1 class="mb-4">Адмін-панель</h1>
+<div class="container fade-in py-5">
+    <h1 class="mb-4" style="font-weight: 700;">Адмін-панель</h1>
 
-    <div class="row">
-        <div class="col-md-3 mb-4">
-            <div class="card admin-stat-card">
-                <div class="card-body text-center">
-                    <h2 class="text-primary">@ViewBag.ProductsCount</h2>
-                    <p class="mb-0">Товарів</p>
-                    <a asp-action="Products" class="btn btn-sm btn-outline-primary mt-2">Управління</a>
-                </div>
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="glass-card text-center h-100 d-flex flex-column justify-content-center">
+                <div class="mb-2 text-primary" style="font-size: 2rem;">📦</div>
+                <h2>@ViewBag.ProductsCount</h2>
+                <p class="text-muted mb-0">Товарів</p>
+                <a asp-action="Products" class="btn btn-sm btn-outline-primary mt-3 rounded-pill">Управління</a>
             </div>
         </div>
-        <div class="col-md-3 mb-4">
-            <div class="card admin-stat-card">
-                <div class="card-body text-center">
-                    <h2 class="text-success">@ViewBag.CategoriesCount</h2>
-                    <p class="mb-0">Категорій</p>
-                </div>
+        <div class="col-md-3">
+            <div class="glass-card text-center h-100 d-flex flex-column justify-content-center">
+                <div class="mb-2 text-danger" style="font-size: 2rem;">🍽️</div>
+                <h2>Rest</h2>
+                <p class="text-muted mb-0">Ресторани</p>
+                <a asp-controller="Restaurants" asp-action="Index" class="btn btn-sm btn-outline-danger mt-3 rounded-pill">Управління</a>
             </div>
         </div>
-        <div class="col-md-3 mb-4">
-            <div class="card admin-stat-card">
-                <div class="card-body text-center">
-                    <h2 class="text-info">@ViewBag.OrdersCount</h2>
-                    <p class="mb-0">Замовлень</p>
-                    <a asp-action="Orders" class="btn btn-sm btn-outline-info mt-2">Переглянути</a>
-                </div>
+        <div class="col-md-3">
+            <div class="glass-card text-center h-100 d-flex flex-column justify-content-center">
+                <div class="mb-2 text-warning" style="font-size: 2rem;">🔥</div>
+                <h2>Promo</h2>
+                <p class="text-muted mb-0">Акції</p>
+                <a asp-controller="Promotions" asp-action="Index" class="btn btn-sm btn-outline-warning mt-3 rounded-pill">Управління</a>
             </div>
         </div>
-        <div class="col-md-3 mb-4">
-            <div class="card admin-stat-card">
-                <div class="card-body text-center">
-                    <h2 class="text-warning">@ViewBag.TotalRevenue.ToString("0.00") ₴</h2>
-                    <p class="mb-0">Доход</p>
-                </div>
+        <div class="col-md-3">
+             <div class="glass-card text-center h-100 d-flex flex-column justify-content-center">
+                <div class="mb-2 text-info" style="font-size: 2rem;">🛍️</div>
+                <h2>@ViewBag.OrdersCount</h2>
+                <p class="text-muted mb-0">Замовлень</p>
+                <a asp-action="Orders" class="btn btn-sm btn-outline-info mt-3 rounded-pill">Переглянути</a>
             </div>
         </div>
     </div>
 
-    <div class="mt-4">
-        <a asp-action="Products" class="btn btn-primary me-2">Управління товарами</a>
-        <a asp-action="Orders" class="btn btn-info me-2">Управління замовленнями</a>
-        <a asp-action="Users" class="btn btn-success">Управління користувачами</a>
+    <div class="glass-card">
+        <h4 class="mb-4">Швидкі Дії</h4>
+        <div class="d-flex flex-wrap gap-3">
+            <a asp-action="Products" class="btn btn-primary rounded-pill px-4">Управління товарами</a>
+            <a asp-action="Orders" class="btn btn-info rounded-pill px-4 text-white">Управління замовленнями</a>
+            <a asp-action="Users" class="btn btn-success rounded-pill px-4">Управління користувачами</a>
+        </div>
     </div>
 </div>
 

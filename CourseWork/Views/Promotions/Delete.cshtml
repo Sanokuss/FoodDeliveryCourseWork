@@ -1,0 +1,25 @@
+@model CourseWork.Models.Promotion
+
+@{
+    ViewData["Title"] = "Видалити акцію";
+}
+
+<div class="container mt-4">
+    <div class="alert alert-danger">
+        <h3>Ви впевнені, що хочете видалити цю акцію?</h3>
+    </div>
+
+    <div class="card mb-4" style="max-width: 500px;">
+        <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Title" style="height: 250px; object-fit: cover;">
+        <div class="card-body">
+            <h4 class="card-title">@Model.Title</h4>
+            <p class="card-text">@Model.Description</p>
+        </div>
+    </div>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Видалити" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>

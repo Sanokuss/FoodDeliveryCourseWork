@@ -1,6 +1,6 @@
 @model Order
 @{
-    ViewData["Title"] = "Помилка оплати";
+    ViewData["Title"] = "Ой-ой! Оплата не пройшла 💸";
 }
 
 @section Styles {
@@ -15,23 +15,22 @@
                 <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
             </svg>
         </div>
-        <h1 class="failure-title">Оплата не завершена</h1>
-        <p class="failure-message">Ваше замовлення не було оплачено</p>
+        <h1 class="failure-title">Гаманець сказав: "Не сьогодні!" 😅</h1>
+        <p class="failure-message">Оплата не пройшла, але не переживайте — смаколики нікуди не дінуться!</p>
         
         @if (Model != null)
         {
             <div class="order-details-card card">
                 <div class="card-body">
-                    <h5 class="card-title">Номер замовлення: #@Model.Id</h5>
-                    <p>Ви можете спробувати оформити замовлення ще раз</p>
+                    <h5 class="card-title">Замовлення #@Model.Id чекатиме на вас 🍕</h5>
+                    <p>Спробуйте ще раз — можливо, картка просто загубилась у сумці!</p>
                 </div>
             </div>
         }
 
         <div class="failure-actions">
-            <a asp-controller="Cart" asp-action="Index" class="btn btn-primary">Повернутися до кошика</a>
-            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">На головну</a>
+            <a asp-controller="Cart" asp-action="Index" class="btn btn-primary">🛒 До кошика</a>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">🏠 На головну</a>
         </div>
     </div>
 </div>
-

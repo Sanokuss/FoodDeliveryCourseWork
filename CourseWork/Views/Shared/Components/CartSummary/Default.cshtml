@@ -1,0 +1,10 @@
+@model int
+
+@if (Model > 0)
+{
+    <span class="cart-badge" id="floatingCartCount">@Model</span>
+}
+else
+{
+    <span class="cart-badge d-none" id="floatingCartCount">0</span>
+}

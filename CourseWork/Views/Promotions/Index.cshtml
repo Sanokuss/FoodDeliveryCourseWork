@@ -1,0 +1,63 @@
+@model IEnumerable<CourseWork.Models.Promotion>
+
+@{
+    ViewData["Title"] = "Акції";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Акції</h2>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Додати акцію
+            </a>
+        }
+    </div>
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="@item.ImageUrl" class="card-img-top" alt="@item.Title" style="height: 250px; object-fit: cover;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="card-title">@item.Title</h5>
+                            @if (item.IsActive)
+                            {
+                                <span class="badge bg-success">Активна</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Неактивна</span>
+                            }
+                        </div>
+                        <p class="card-text text-muted">@item.Description</p>
+                        
+                        @if (!string.IsNullOrEmpty(item.PromoCode))
+                        {
+                            <div class="alert alert-info py-2">
+                                <strong>Код:</strong> @item.PromoCode 
+                                @if (item.DiscountPercent.HasValue)
+                                {
+                                    <span>(-@item.DiscountPercent%)</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-warning btn-sm">Редагувати</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm">Видалити</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

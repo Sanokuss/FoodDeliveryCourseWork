@@ -9,70 +9,11 @@ namespace CourseWork.Data
     {
         public static async Task Initialize(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
-            // Apply pending migrations
-            try
-            {
-                await context.Database.MigrateAsync();
-            }
-            catch (Exception ex)
-            {
-                // Log the error (you might want to use ILogger in a real application)
-                Console.WriteLine($"An error occurred while applying migrations: {ex.Message}");
-            }
-            
-            // Always check and add missing columns manually (in case migration doesn't apply)
-            // This ensures columns exist even if migration system doesn't recognize the migration
-            try
-            {
-                var connection = context.Database.GetDbConnection();
-                var wasOpen = connection.State == System.Data.ConnectionState.Open;
-                if (!wasOpen)
-                {
-                    await connection.OpenAsync();
-                }
-                
-                using var command = connection.CreateCommand();
-                
-                // Check and add IsNew column
-                command.CommandText = @"
-                    IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[dbo].[Products]') AND name = 'IsNew')
-                    BEGIN
-                        ALTER TABLE [dbo].[Products] ADD [IsNew] bit NOT NULL DEFAULT 0;
-                        PRINT 'Column IsNew added successfully';
-                    END";
-                await command.ExecuteNonQueryAsync();
-                
-                // Check and add IsBestSeller column
-                command.CommandText = @"
-                    IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[dbo].[Products]') AND name = 'IsBestSeller')
-                    BEGIN
-                        ALTER TABLE [dbo].[Products] ADD [IsBestSeller] bit NOT NULL DEFAULT 0;
-                        PRINT 'Column IsBestSeller added successfully';
-                    END";
-                await command.ExecuteNonQueryAsync();
-                
-                if (!wasOpen)
-                {
-                    await connection.CloseAsync();
-                }
-                Console.WriteLine("Database columns verified/added successfully.");
-            }
-            catch (Exception manualEx)
-            {
-                Console.WriteLine($"Warning: Failed to verify/add columns manually: {manualEx.Message}");
-                Console.WriteLine($"Stack trace: {manualEx.StackTrace}");
-                // Don't throw - let the application continue, it will fail later if columns are missing
-            }
+            await context.Database.EnsureCreatedAsync();
 
             // Create Roles
-            if (!await roleManager.RoleExistsAsync("Admin"))
-            {
-                await roleManager.CreateAsync(new IdentityRole("Admin"));
-            }
-            if (!await roleManager.RoleExistsAsync("User"))
-            {
-                await roleManager.CreateAsync(new IdentityRole("User"));
-            }
+            if (!await roleManager.RoleExistsAsync("Admin")) await roleManager.CreateAsync(new IdentityRole("Admin"));
+            if (!await roleManager.RoleExistsAsync("User")) await roleManager.CreateAsync(new IdentityRole("User"));
 
             // Create Admin User
             if (await userManager.FindByEmailAsync("admin@fooddelivery.com") == null)
@@ -85,258 +26,104 @@ namespace CourseWork.Data
                     FullName = "Адміністратор"
                 };
                 var result = await userManager.CreateAsync(adminUser, "Admin123!");
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
-                }
+                if (result.Succeeded) await userManager.AddToRoleAsync(adminUser, "Admin");
             }
 
-            // Check if database is already seeded
-            if (context.Categories.Any())
+            // --- Seed Categories ---
+            if (!context.Categories.Any())
             {
-                return;
+                var categories = new Category[]
+                {
+                    new Category { Name = "Піца", DisplayOrder = 1 },
+                    new Category { Name = "Суші", DisplayOrder = 2 },
+                    new Category { Name = "Бургери", DisplayOrder = 3 },
+                    new Category { Name = "Напої", DisplayOrder = 4 },
+                    new Category { Name = "Десерти", DisplayOrder = 5 },
+                    new Category { Name = "Салати", DisplayOrder = 6 },
+                    new Category { Name = "Снеки", DisplayOrder = 7 }
+                };
+                context.Categories.AddRange(categories);
+                await context.SaveChangesAsync();
             }
 
-            // Seed Categories
-            var categories = new Category[]
+            // --- Seed Restaurants ---
+            if (!context.Restaurants.Any())
             {
-                new Category { Name = "Піца", DisplayOrder = 1 },
-                new Category { Name = "Суші", DisplayOrder = 2 },
-                new Category { Name = "Напої", DisplayOrder = 3 },
-                new Category { Name = "Десерти", DisplayOrder = 4 },
-                new Category { Name = "Бургери", DisplayOrder = 5 },
-                new Category { Name = "Салати", DisplayOrder = 6 },
-                new Category { Name = "Снеки", DisplayOrder = 7 }
-            };
-
-            foreach (var category in categories)
-            {
-                context.Categories.Add(category);
+                var restaurants = new Restaurant[]
+                {
+                    new Restaurant { Name = "Sushi Master", Description = "Найкращі суші та роли у місті. Свіжа риба щодня.", Address = "вул. Дерибасівська, 10", WorkingHours = "10:00 - 23:00", LogoUrl = "https://cdn-icons-png.flaticon.com/512/2276/2276931.png" },
+                    new Restaurant { Name = "Pizza King", Description = "Справжня італійська піца з дров'яної печі.", Address = "пр. Шевченка, 5", WorkingHours = "09:00 - 22:00", LogoUrl = "https://cdn-icons-png.flaticon.com/512/1037/1037762.png" },
+                    new Restaurant { Name = "Burger Joint", Description = "Соковиті бургери з мармурової яловичини.", Address = "вул. Грецька, 25", WorkingHours = "11:00 - 00:00", LogoUrl = "https://cdn-icons-png.flaticon.com/512/4264/4264850.png" },
+                    new Restaurant { Name = "Green Salad", Description = "Здорове харчування, свіжі салати та смузі.", Address = "вул. Садова, 12", WorkingHours = "08:00 - 21:00", LogoUrl = "https://cdn-icons-png.flaticon.com/512/4264/4264770.png" },
+                    new Restaurant { Name = "Sweet Dreams", Description = "Авторські десерти та найкраща кава.", Address = "пл. Соборна, 1", WorkingHours = "09:00 - 21:00", LogoUrl = "https://cdn-icons-png.flaticon.com/512/2935/2935394.png" }
+                };
+                context.Restaurants.AddRange(restaurants);
+                await context.SaveChangesAsync();
             }
-            await context.SaveChangesAsync();
 
-            // Seed Products
-            var products = new Product[]
+            // --- Seed Promotions ---
+            if (!context.Promotions.Any())
             {
-                // Піца
-                new Product
+                var promotions = new Promotion[]
                 {
-                    Name = "Піца Папероні",
-                    Description = "Класична піца з гострою ковбасою папероні, моцарелою та томатним соусом",
-                    Price = 299.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=500&h=500&fit=crop",
-                    CategoryId = categories[0].Id,
-                    IsNew = true,
-                    IsBestSeller = true
-                },
-                new Product
-                {
-                    Name = "Піца Маргарита",
-                    Description = "Традиційна італійська піца з моцарелою, томатами та базиліком",
-                    Price = 249.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=500&h=500&fit=crop",
-                    CategoryId = categories[0].Id
-                },
-                new Product
-                {
-                    Name = "Піца Чотири Сири",
-                    Description = "Піца з моцарелою, горгонзолою, пармезаном та чеддером",
-                    Price = 329.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=500&h=500&fit=crop",
-                    CategoryId = categories[0].Id
-                },
-                new Product
-                {
-                    Name = "Піца Гавайська",
-                    Description = "Піца з куркою, ананасами та моцарелою",
-                    Price = 279.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=500&h=500&fit=crop",
-                    CategoryId = categories[0].Id
-                },
-                new Product
-                {
-                    Name = "Піца М'ясна",
-                    Description = "Піца з беконом, салямі, ковбасою та моцарелою",
-                    Price = 349.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=500&h=500&fit=crop",
-                    CategoryId = categories[0].Id,
-                    IsBestSeller = true
-                },
-                // Суші
-                new Product
-                {
-                    Name = "Філадельфія з лососем",
-                    Description = "Роли з лососем, авокадо та вершковим сиром",
-                    Price = 350.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=500&h=500&fit=crop",
-                    CategoryId = categories[1].Id,
-                    IsNew = true,
-                    IsBestSeller = true
-                },
-                new Product
-                {
-                    Name = "Каліфорнія",
-                    Description = "Роли з крабом, авокадо та огірком",
-                    Price = 280.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1617196034183-421b4917c92d?w=500&h=500&fit=crop",
-                    CategoryId = categories[1].Id
-                },
-                new Product
-                {
-                    Name = "Сет Філадельфія",
-                    Description = "Набір ролів: Філадельфія класична, Філадельфія з тунцем, Філадельфія з креветкою",
-                    Price = 450.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=500&h=500&fit=crop",
-                    CategoryId = categories[1].Id
-                },
-                new Product
-                {
-                    Name = "Роли Дракон",
-                    Description = "Роли з вугрем, авокадо та соусом унагі",
-                    Price = 380.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1617196034183-421b4917c92d?w=500&h=500&fit=crop",
-                    CategoryId = categories[1].Id
-                },
-                // Напої
-                new Product
-                {
-                    Name = "Кока-Кола",
-                    Description = "Освіжаючий газований напій, 0.5л",
-                    Price = 45.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=500&h=500&fit=crop",
-                    CategoryId = categories[2].Id
-                },
-                new Product
-                {
-                    Name = "Пепсі",
-                    Description = "Газований напій, 0.5л",
-                    Price = 45.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=500&h=500&fit=crop",
-                    CategoryId = categories[2].Id
-                },
-                new Product
-                {
-                    Name = "Сік апельсиновий",
-                    Description = "Натуральний сік, 0.5л",
-                    Price = 55.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=500&h=500&fit=crop",
-                    CategoryId = categories[2].Id
-                },
-                new Product
-                {
-                    Name = "Вода мінеральна",
-                    Description = "Мінеральна вода, 0.5л",
-                    Price = 30.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1548839140-5a941f94e0ea?w=500&h=500&fit=crop",
-                    CategoryId = categories[2].Id
-                },
-                // Десерти
-                new Product
-                {
-                    Name = "Тірамісу",
-                    Description = "Класичний італійський десерт з кави та маскарпоне",
-                    Price = 120.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=500&h=500&fit=crop",
-                    CategoryId = categories[3].Id
-                },
-                new Product
-                {
-                    Name = "Чізкейк",
-                    Description = "Ніжний чізкейк з ягідним соусом",
-                    Price = 135.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1524351199678-941a58a3df50?w=500&h=500&fit=crop",
-                    CategoryId = categories[3].Id
-                },
-                new Product
-                {
-                    Name = "Шоколадний торт",
-                    Description = "Шоколадний торт з кремом",
-                    Price = 150.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&h=500&fit=crop",
-                    CategoryId = categories[3].Id
-                },
-                // Бургери
-                new Product
-                {
-                    Name = "Класичний бургер",
-                    Description = "Бургер з яловичиною, салатом, томатом та соусом",
-                    Price = 199.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&h=500&fit=crop",
-                    CategoryId = categories[4].Id
-                },
-                new Product
-                {
-                    Name = "Чізбургер",
-                    Description = "Бургер з яловичиною, сиром, салатом та соусом",
-                    Price = 219.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&h=500&fit=crop",
-                    CategoryId = categories[4].Id
-                },
-                new Product
-                {
-                    Name = "Чікенбургер",
-                    Description = "Бургер з курячим філе, салатом та соусом",
-                    Price = 189.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&h=500&fit=crop",
-                    CategoryId = categories[4].Id
-                },
-                // Салати
-                new Product
-                {
-                    Name = "Цезар з куркою",
-                    Description = "Салат з куркою, салатом ромен, пармезаном та соусом цезар",
-                    Price = 179.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=500&h=500&fit=crop",
-                    CategoryId = categories[5].Id
-                },
-                new Product
-                {
-                    Name = "Грецький салат",
-                    Description = "Салат з томатами, огірками, оливками, сиром фета та олією",
-                    Price = 159.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=500&h=500&fit=crop",
-                    CategoryId = categories[5].Id
-                },
-                new Product
-                {
-                    Name = "Салат з тунцем",
-                    Description = "Салат з тунцем, яйцем, томатами та оливковою олією",
-                    Price = 169.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=500&h=500&fit=crop",
-                    CategoryId = categories[5].Id
-                },
-                // Снеки
-                new Product
-                {
-                    Name = "Картопля фрі",
-                    Description = "Хрустка картопля фрі з соусом",
-                    Price = 89.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=500&h=500&fit=crop",
-                    CategoryId = categories[6].Id
-                },
-                new Product
-                {
-                    Name = "Нагетси курячі",
-                    Description = "Хрусткі курячі нагетси, 6 шт",
-                    Price = 129.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=500&h=500&fit=crop",
-                    CategoryId = categories[6].Id
-                },
-                new Product
-                {
-                    Name = "Крильця курячі",
-                    Description = "Гострі курячі крильця з соусом",
-                    Price = 149.00m,
-                    ImageUrl = "https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=500&h=500&fit=crop",
-                    CategoryId = categories[6].Id
-                }
-            };
-
-            foreach (var product in products)
-            {
-                context.Products.Add(product);
+                    new Promotion { Title = "1+1 на роли", Description = "Замовляй один рол Філадельфія і отримуй другий у подарунок!", DiscountPercent = 50, ImageUrl = "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600&h=400&fit=crop", PromoCode = "SUSHI11" },
+                    new Promotion { Title = "Щасливі години", Description = "Знижка -20% на все меню з 12:00 до 15:00 по буднях.", DiscountPercent = 20, ImageUrl = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop", PromoCode = "HAPPYHOUR" },
+                    new Promotion { Title = "Безкоштовна доставка", Description = "При замовленні від 500 грн доставка за наш рахунок.", DiscountPercent = 0, ImageUrl = "https://images.unsplash.com/photo-1619652576082-f54f76274488?w=600&h=400&fit=crop", PromoCode = "FREEDELIVERY" }
+                };
+                context.Promotions.AddRange(promotions);
+                await context.SaveChangesAsync();
             }
-            await context.SaveChangesAsync();
+
+            // --- Seed Products ---
+            if (!context.Products.Any())
+            {
+                var cats = context.Categories.ToDictionary(c => c.Name, c => c.Id);
+                var rests = context.Restaurants.ToDictionary(r => r.Name, r => r.Id);
+                
+                var products = new List<Product>
+                {
+                    // Pizza - Pizza King
+                    new Product { Name = "Пепероні", Description = "Гостра ковбаса пепероні, моцарела, томатний соус, орегано.", Price = 210, CategoryId = cats["Піца"], RestaurantId = rests["Pizza King"], ImageUrl = "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=800&q=80", IsBestSeller = true },
+                    new Product { Name = "Чотири Сири", Description = "Моцарела, пармезан, горгонзола, емменталь, вершковий соус.", Price = 240, CategoryId = cats["Піца"], RestaurantId = rests["Pizza King"], ImageUrl = "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=800&q=80" },
+                    new Product { Name = "Маргарита", Description = "Класична піца з томатами, моцарелою та свіжим базиліком.", Price = 180, CategoryId = cats["Піца"], RestaurantId = rests["Pizza King"], ImageUrl = "https://images.unsplash.com/photo-1595854341625-f33ee10432fa?auto=format&fit=crop&w=800&q=80", IsNew = true },
+                    new Product { Name = "Гавайська", Description = "Курка, свіжі ананаси, моцарела, томатний соус.", Price = 220, CategoryId = cats["Піца"], RestaurantId = rests["Pizza King"], ImageUrl = "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80" },
+                    new Product { Name = "М'ясна", Description = "Бекон, шинка, салямі, мисливські ковбаски, барбекю соус.", Price = 260, CategoryId = cats["Піца"], RestaurantId = rests["Pizza King"], ImageUrl = "https://images.unsplash.com/photo-1590947132387-155cc02f3212?auto=format&fit=crop&w=800&q=80", IsBestSeller = true },
+                    
+                    // Sushi - Sushi Master
+                    new Product { Name = "Філадельфія", Description = "Свіжий лосось, авокадо, огірок, ніжний крем-сир.", Price = 320, CategoryId = cats["Суші"], RestaurantId = rests["Sushi Master"], ImageUrl = "https://images.unsplash.com/photo-1611143669185-af224c5e3252?auto=format&fit=crop&w=800&q=80", IsBestSeller = true },
+                    new Product { Name = "Каліфорнія", Description = "Сніжний краб, авокадо, огірок, ікра тобіко, японський майонез.", Price = 290, CategoryId = cats["Суші"], RestaurantId = rests["Sushi Master"], ImageUrl = "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80" },
+                    new Product { Name = "Зелений Дракон", Description = "Копчений вугор, авокадо, унагі соус, кунжут, рис.", Price = 360, CategoryId = cats["Суші"], RestaurantId = rests["Sushi Master"], ImageUrl = "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=800&q=80", IsNew = true },
+                    new Product { Name = "Макі з лососем", Description = "Класичні роли зі свіжим лососем та норі.", Price = 150, CategoryId = cats["Суші"], RestaurantId = rests["Sushi Master"], ImageUrl = "https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=800&q=80" },
+                    
+                    // Burgers - Burger Joint
+                    new Product { Name = "Чізбургер XL", Description = "Подвійна яловича котлета, подвійний чеддер, маринований огірок, соус.", Price = 230, CategoryId = cats["Бургери"], RestaurantId = rests["Burger Joint"], ImageUrl = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80", IsBestSeller = true },
+                    new Product { Name = "Чікен Бургер", Description = "Хрустка куряча котлета, свіжий салат, томат, фірмовий майонез.", Price = 190, CategoryId = cats["Бургери"], RestaurantId = rests["Burger Joint"], ImageUrl = "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=800&q=80" },
+                    new Product { Name = "BBQ Бургер", Description = "Яловичина, хрусткий бекон, цибулеві кільця, насичений BBQ соус.", Price = 250, CategoryId = cats["Бургери"], RestaurantId = rests["Burger Joint"], ImageUrl = "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=800&q=80", IsNew = true },
+
+                    // Snacks - Burger Joint
+                    new Product { Name = "Картопля Фрі", Description = "Золотиста хрустка картопля з сіллю.", Price = 80, CategoryId = cats["Снеки"], RestaurantId = rests["Burger Joint"], ImageUrl = "https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?auto=format&fit=crop&w=800&q=80" },
+                    new Product { Name = "Нагетси (9 шт)", Description = "Ніжне куряче філе в хрусткій паніровці.", Price = 120, CategoryId = cats["Снеки"], RestaurantId = rests["Burger Joint"], ImageUrl = "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80" },
+                    new Product { Name = "Цибулеві кільця", Description = "Смажені кільця цибулі в золотистому клярі.", Price = 95, CategoryId = cats["Снеки"], RestaurantId = rests["Burger Joint"], ImageUrl = "https://images.unsplash.com/photo-1639024471283-03518883512d?auto=format&fit=crop&w=800&q=80" },
+
+                    // Desserts - Sweet Dreams
+                    new Product { Name = "Тірамісу", Description = "Італійський десерт з маскарпоне, кавою та печивом савоярді.", Price = 140, CategoryId = cats["Десерти"], RestaurantId = rests["Sweet Dreams"], ImageUrl = "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=800&q=80" },
+                    new Product { Name = "Чізкейк Нью-Йорк", Description = "Класичний вершковий чізкейк на пісочній основі.", Price = 130, CategoryId = cats["Десерти"], RestaurantId = rests["Sweet Dreams"], ImageUrl = "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=800&q=80", IsBestSeller = true },
+                    new Product { Name = "Брауні", Description = "Шоколадний десерт з вологою серединкою та волоськими горіхами.", Price = 110, CategoryId = cats["Десерти"], RestaurantId = rests["Sweet Dreams"], ImageUrl = "https://images.unsplash.com/photo-1606313564200-e75d5e30476d?auto=format&fit=crop&w=800&q=80" },
+                    
+                    // Salads - Green Salad
+                    new Product { Name = "Грецький салат", Description = "Свіжі огірки, помідори, оливки Каламата, сир фета, орегано.", Price = 120, CategoryId = cats["Салати"], RestaurantId = rests["Green Salad"], ImageUrl = "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80" },
+                    new Product { Name = "Цезар", Description = "Салат айсберг, курка гриль, сухарики, пармезан, соус Цезар.", Price = 150, CategoryId = cats["Салати"], RestaurantId = rests["Green Salad"], ImageUrl = "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?auto=format&fit=crop&w=800&q=80", IsBestSeller = true },
+                    new Product { Name = "Овочевий мікс", Description = "Мікс свіжих сезонних овочів з оливковою олією.", Price = 95, CategoryId = cats["Салати"], RestaurantId = rests["Green Salad"], ImageUrl = "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80" },
+
+                    // Drinks - Various Restaurants
+                    new Product { Name = "Coca-Cola 0.5л", Description = "Класичний освіжаючий напій.", Price = 45, CategoryId = cats["Напої"], RestaurantId = rests["Burger Joint"], ImageUrl = "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=800&q=80" },
+                    new Product { Name = "Апельсиновий сік", Description = "Свіжовичавлений апельсиновий сік.", Price = 80, CategoryId = cats["Напої"], RestaurantId = rests["Green Salad"], ImageUrl = "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&w=800&q=80" },
+                    new Product { Name = "Лимонад", Description = "Домашній лимонад з м'ятою та льодом.", Price = 60, CategoryId = cats["Напої"], RestaurantId = rests["Pizza King"], ImageUrl = "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80", IsBestSeller = true },
+                    new Product { Name = "Американо", Description = "Ароматна чорна кава зі свіжообсмажених зерен.", Price = 50, CategoryId = cats["Напої"], RestaurantId = rests["Sweet Dreams"], ImageUrl = "https://images.unsplash.com/photo-1559496417-e7f25cb247f3?auto=format&fit=crop&w=800&q=80" }
+                };
+                context.Products.AddRange(products);
+                await context.SaveChangesAsync();
+            }
         }
     }
 }

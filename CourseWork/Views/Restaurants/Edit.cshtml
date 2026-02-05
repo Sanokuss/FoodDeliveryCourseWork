@@ -1,0 +1,57 @@
+@model CourseWork.Models.Restaurant
+
+@{
+    ViewData["Title"] = "Редагувати ресторан";
+}
+
+<div class="container mt-4">
+    <h2>Редагувати ресторан</h2>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">Назва</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="Address" class="form-label">Адреса</label>
+                    <input asp-for="Address" class="form-control" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="WorkingHours" class="form-label">Години роботи</label>
+                    <input asp-for="WorkingHours" class="form-control" />
+                    <span asp-validation-for="WorkingHours" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label">Опис</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="LogoUrl" class="form-label">URL Логотипу</label>
+                    <input asp-for="LogoUrl" class="form-control" />
+                    <span asp-validation-for="LogoUrl" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <input type="submit" value="Зберегти" class="btn btn-primary" />
+                    <a asp-action="Index" class="btn btn-secondary">Назад</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -4,12 +4,12 @@ namespace CourseWork.ViewModels
 {
     public class LoginViewModel
     {
-        [Required(ErrorMessage = "Email обов'язковий")]
-        [EmailAddress(ErrorMessage = "Невірний формат email")]
+        [Required(ErrorMessage = "Куди ж без email? Введіть, будь ласка! 📬")]
+        [EmailAddress(ErrorMessage = "Це email чи код до сейфа? Перевірте формат! 🔑")]
         [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Пароль обов'язковий")]
+        [Required(ErrorMessage = "Пароль забули? Бувало... Але введіть щось! 🧠")]
         [DataType(DataType.Password)]
         [Display(Name = "Пароль")]
         public string Password { get; set; } = string.Empty;
@@ -21,4 +21,3 @@ namespace CourseWork.ViewModels
         public string? ReturnUrl { get; set; } = string.Empty;
     }
 }
-

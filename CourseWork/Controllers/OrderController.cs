@@ -94,7 +94,7 @@ namespace CourseWork.Controllers
                 // Check if Stripe key is configured
                 if (string.IsNullOrEmpty(stripeSecretKey) || stripeSecretKey.Contains("your_secret_key"))
                 {
-                    ModelState.AddModelError("", "Сервіс оплати тимчасово недоступний. Будь ласка, зверніться до адміністратора.");
+                    ModelState.AddModelError("", "Оплата прилягла відпочити 💤 Сервіс тимчасово недоступний. Зверніться до адміністратора!");
                     return View("Checkout", model);
                 }
 
@@ -134,13 +134,13 @@ namespace CourseWork.Controllers
             catch (StripeException ex)
             {
                 // Log the error (in production, use proper logging)
-                ModelState.AddModelError("", $"Помилка при створенні сесії оплати: {ex.Message}. Будь ласка, спробуйте пізніше або зверніться до підтримки.");
+                ModelState.AddModelError("", $"Платіжна система вередує! 💳 {ex.Message}. Спробуйте ще раз!");
                 return View("Checkout", model);
             }
             catch (Exception)
             {
                 // Log the error (in production use proper logging)
-                ModelState.AddModelError("", "Сталася неочікувана помилка. Будь ласка, спробуйте пізніше.");
+                ModelState.AddModelError("", "Щось пішло не так... Навіть ми здивовані! 😲 Спробуйте пізніше.");
                 return View("Checkout", model);
             }
         }

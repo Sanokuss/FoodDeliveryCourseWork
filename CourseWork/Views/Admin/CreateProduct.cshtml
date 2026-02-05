@@ -35,7 +35,7 @@
             <span asp-validation-for="ImageUrl" class="text-danger"></span>
         </div>
 
-        <div class="mb-3">
+            <div class="mb-3">
             <label asp-for="CategoryId" class="form-label">Категорія</label>
             <select asp-for="CategoryId" class="form-control" required>
                 <option value="">Оберіть категорію</option>
@@ -48,6 +48,21 @@
                 }
             </select>
             <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="RestaurantId" class="form-label">Ресторан</label>
+            <select asp-for="RestaurantId" class="form-control" required>
+                <option value="">Оберіть ресторан</option>
+                @if (ViewBag.Restaurants != null)
+                {
+                    @foreach (var restaurant in (IEnumerable<Restaurant>)ViewBag.Restaurants)
+                    {
+                        <option value="@restaurant.Id">@restaurant.Name</option>
+                    }
+                }
+            </select>
+            <span asp-validation-for="RestaurantId" class="text-danger"></span>
         </div>
 
         <div class="mb-3">

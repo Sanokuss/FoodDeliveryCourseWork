@@ -4,32 +4,33 @@
 .admin-stat-card {
     border: none;
     border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: linear-gradient(135deg, var(--surface-color) 0%, var(--bg-color) 100%);
 }
 
 .admin-stat-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .admin-stat-card h2 {
     font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
+    color: var(--text-color);
 }
 
 .admin-stat-card p {
     font-size: 1.1rem;
-    color: #6c757d;
+    color: var(--text-muted);
     font-weight: 500;
 }
 
 .table th {
-    background-color: #f8f9fa;
+    background-color: var(--bg-color);
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--text-color);
 }
 
 .table tbody tr {
@@ -37,12 +38,11 @@
 }
 
 .table tbody tr:hover {
-    background-color: #f8f9fa;
-    transform: scale(1.01);
+    background-color: var(--bg-color);
+    transform: scale(1.005);
 }
 
 .badge {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
 }
-

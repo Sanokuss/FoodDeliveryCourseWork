@@ -38,11 +38,14 @@ namespace CourseWork.Controllers
                 products = products.Where(p => p.CategoryId == categoryId.Value);
             }
 
-            // Filter by search term (only by product name)
+            // Filter by search term (Name, Description, and Category)
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
+                var lowerTerm = searchTerm.Trim().ToLower();
                 products = products.Where(p => 
-                    p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+                    p.Name.ToLower().Contains(lowerTerm) || 
+                    (p.Description != null && p.Description.ToLower().Contains(lowerTerm)) ||
+                    (p.Category != null && p.Category.Name.ToLower().Contains(lowerTerm)));
             }
 
             // Include category for display
@@ -51,6 +54,12 @@ namespace CourseWork.Controllers
             // Get cart count for badge
             var cart = HttpContext.Session.GetObjectFromJson<List<ViewModels.CartItem>>(SessionCartKey) ?? new List<ViewModels.CartItem>();
             ViewBag.CartCount = cart.Sum(c => c.Quantity);
+
+            // Return partial view for AJAX requests
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_ProductList", products);
+            }
 
             return View(products);
         }

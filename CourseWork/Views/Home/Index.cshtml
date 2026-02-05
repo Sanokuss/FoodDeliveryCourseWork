@@ -4,113 +4,68 @@
     var categories = ViewBag.Categories as List<Category>;
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
-}
-
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 9999;" role="alert">
-        @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-
-<div class="container fade-in">
-    <h1 class="text-center mb-4 menu-header">Меню</h1>
-
-    <!-- Search Bar -->
-    <div class="mb-4 search-container">
-        <form asp-action="Index" method="get" class="search-form">
-            <div class="search-wrapper">
-                <div class="search-input-wrapper">
-                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                    </svg>
-                    <input type="text" name="searchTerm" class="form-control search-input" placeholder="Пошук по назві товару..." value="@ViewBag.SearchTerm" autocomplete="off" />
-                </div>
-                <select name="categoryId" class="form-select category-select">
-                    <option value="">Всі категорії</option>
-                    @if (categories != null)
-                    {
-                        @foreach (var category in categories)
-                        {
-                            <option value="@category.Id" selected="@(ViewBag.SelectedCategoryId?.ToString() == category.Id.ToString())">
-                                @category.Name
-                            </option>
-                        }
-                    }
-                </select>
-                <button type="submit" class="btn btn-primary search-btn">
-                    <span>Пошук</span>
+<div class="container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Швидка доставка <br><span>Улюблених Страв</span></h1>
+            <p>Замовляйте найсмачнішу їжу з найкращих ресторанів міста. Швидка доставка прямо до ваших дверей.</p>
+            
+            <!-- Search in Hero -->
+            <form id="hero-search" asp-action="Index" method="get" style="max-width: 400px; position: relative;">
+                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Що бажаєте з'їсти?" 
+                       style="width: 100%; padding: 16px 24px; padding-right: 60px; border-radius: 50px; border: none; background: var(--surface-color); color: var(--text-color); box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
+                <button type="submit" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; background: var(--primary-color); border: none; color: white; cursor: pointer;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 </button>
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
+        <div class="hero-image-wrapper position-relative">
+             <!-- Rotating Pizza Image -->
+             <div class="rotating-pizza-container">
+                 <img src="~/images/pngwing.com.png" 
+                      alt="Delicious Pizza" class="hero-pizza-img">
+             </div>
+             
+             <!-- Text Overlay with Ink Animation -->
+             <div class="hero-overlay-text">
+                 <svg viewBox="0 0 900 300" width="100%" height="100%" style="overflow: visible;">
+                     <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" class="handwritten-text">
+                        BodanFood
+                     </text>
+                 </svg>
+             </div>
+        </div>
+    </section>
 
-    <!-- Category Filters -->
-    <div class="mb-4 category-filters">
-        <div class="btn-group" role="group">
-            <a href="@Url.Action("Index", "Home", new { searchTerm = ViewBag.SearchTerm })" 
-               class="btn btn-outline-primary @(ViewBag.SelectedCategoryId == null ? "active" : "")">
-                Всі
+    <!-- Categories -->
+    <div class="mb-5" id="categories">
+        <h3 class="mb-4 text-center" style="font-weight: 700;">Категорії</h3>
+        <div class="categories-wrapper justify-content-center">
+             <a href="@Url.Action("Index", "Home")#categories" class="category-card @(ViewBag.SelectedCategoryId == null ? "active" : "")" data-category-id="">
+                <span class="category-name">Всі</span>
             </a>
             @if (categories != null)
             {
-                @foreach (var category in categories)
+                foreach (var category in categories)
                 {
-                    <a href="@Url.Action("Index", "Home", new { categoryId = category.Id, searchTerm = ViewBag.SearchTerm })" 
-                       class="btn btn-outline-primary @(ViewBag.SelectedCategoryId?.ToString() == category.Id.ToString() ? "active" : "")">
-                        @category.Name
+                    <a href="@Url.Action("Index", "Home", new { categoryId = category.Id })#categories" class="category-card @(ViewBag.SelectedCategoryId?.ToString() == category.Id.ToString() ? "active" : "")" data-category-id="@category.Id">
+                        <span class="category-name">@category.Name</span>
                     </a>
                 }
             }
         </div>
     </div>
 
-    <!-- Products Grid -->
-    <div class="row">
-        @if (Model != null && Model.Any())
-        {
-            @foreach (var product in Model)
-            {
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 shadow-sm product-card">
-                        <div class="product-image-wrapper">
-                            <img src="@product.ImageUrl" class="card-img-top" alt="@product.Name" style="height: 250px; object-fit: cover;">
-                            <div class="product-badges">
-                                @if (product.IsNew)
-                                {
-                                    <span class="badge badge-new">Новинка</span>
-                                }
-                                @if (product.IsBestSeller)
-                                {
-                                    <span class="badge badge-bestseller">Хіт продаж</span>
-                                }
-                            </div>
-                        </div>
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">@product.Name</h5>
-                            <p class="card-text flex-grow-1">@product.Description</p>
-                            <div class="d-flex justify-content-between align-items-center mt-auto">
-                                <h4 class="text-primary mb-0 product-price">@product.Price.ToString("0.00") ₴</h4>
-                                <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline add-to-cart-form" data-product-id="@product.Id" data-product-name="@product.Name">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="productId" value="@product.Id" />
-                                    <input type="hidden" name="quantity" value="1" />
-                                    <button type="submit" class="btn btn-primary add-to-cart-btn">В кошик</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        }
-        else
-        {
-            <div class="col-12">
-                <p class="text-center text-muted empty-products">Товари не знайдено</p>
-            </div>
-        }
+    <!-- Products -->
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 style="font-weight: 700;">Популярні страви</h3>
+            <a href="#" style="color: var(--primary-color); font-weight: 600;">Дивитись всі &rarr;</a>
+        </div>
+
+        <div id="products-container">
+            <partial name="_ProductList" model="Model" />
+        </div>
     </div>
 </div>

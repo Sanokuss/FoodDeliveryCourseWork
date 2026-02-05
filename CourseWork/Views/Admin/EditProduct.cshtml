@@ -45,11 +45,40 @@
                 {
                     @foreach (var category in categories)
                     {
-                        <option value="@category.Id">@category.Name</option>
+                        @if (Model.CategoryId == category.Id)
+                        {
+                            <option value="@category.Id" selected>@category.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@category.Id">@category.Name</option>
+                        }
                     }
                 }
             </select>
             <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="RestaurantId" class="form-label">Ресторан</label>
+            <select asp-for="RestaurantId" class="form-control" required>
+                <option value="">Оберіть ресторан</option>
+                @if (ViewBag.Restaurants != null)
+                {
+                    @foreach (var restaurant in (IEnumerable<Restaurant>)ViewBag.Restaurants)
+                    {
+                        @if (Model.RestaurantId == restaurant.Id)
+                        {
+                            <option value="@restaurant.Id" selected>@restaurant.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@restaurant.Id">@restaurant.Name</option>
+                        }
+                    }
+                }
+            </select>
+            <span asp-validation-for="RestaurantId" class="text-danger"></span>
         </div>
 
         <div class="mb-3">

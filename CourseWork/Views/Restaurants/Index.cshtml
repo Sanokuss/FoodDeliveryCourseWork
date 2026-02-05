@@ -1,0 +1,44 @@
+@model IEnumerable<CourseWork.Models.Restaurant>
+
+@{
+    ViewData["Title"] = "Ресторани";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Or Admin layout if you have one
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Ресторани</h2>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Додати ресторан
+            </a>
+        }
+    </div>
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="@item.LogoUrl" class="card-img-top" alt="@item.Name" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Name</h5>
+                        <p class="card-text text-muted">@item.Address</p>
+                        <p class="card-text"><small class="text-muted">Години: @item.WorkingHours</small></p>
+                        <p class="card-text">@item.Description</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-warning btn-sm">Редагувати</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm">Видалити</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -30,11 +30,14 @@ namespace CourseWork.Repositories
 
         public IEnumerable<T> GetAll()
         {
-            // Include Category for Product entities
+            // Include Category and Restaurant for Product entities
             if (typeof(T) == typeof(Product))
             {
                 var productDbSet = _db.Set<Product>();
-                var products = productDbSet.Include(p => p.Category).ToList();
+                var products = productDbSet
+                    .Include(p => p.Category)
+                    .Include(p => p.Restaurant)
+                    .ToList();
                 return products.Cast<T>();
             }
             
@@ -43,13 +46,16 @@ namespace CourseWork.Repositories
 
         public IEnumerable<T> GetAll(Expression<Func<T, bool>> filter)
         {
-            // Include Category for Product entities
+            // Include Category and Restaurant for Product entities
             if (typeof(T) == typeof(Product))
             {
                 var productDbSet = _db.Set<Product>();
                 // For Product, we need to apply filter after loading
                 // This is less efficient but works correctly
-                var allProducts = productDbSet.Include(p => p.Category).ToList();
+                var allProducts = productDbSet
+                    .Include(p => p.Category)
+                    .Include(p => p.Restaurant)
+                    .ToList();
                 var compiledFilter = filter.Compile();
                 return allProducts.Where(p => compiledFilter((T)(object)p)).Cast<T>();
             }

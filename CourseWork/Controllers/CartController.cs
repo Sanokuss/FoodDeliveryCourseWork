@@ -10,6 +10,7 @@ namespace CourseWork.Controllers
     {
         private readonly IRepository<Product> _productRepo;
         private const string SessionCartKey = "ShoppingCart";
+        private const int MaxItemQuantity = 15;
 
         public CartController(IRepository<Product> productRepo)
         {
@@ -29,7 +30,7 @@ namespace CourseWork.Controllers
             var product = _productRepo.Get(p => p.Id == productId);
             if (product == null)
             {
-                return Json(new { success = false, message = "Товар не знайдено" });
+                return Json(new { success = false, message = "Ой! Цей товар кудись подівся... Магія! 🎩" });
             }
 
             var cart = HttpContext.Session.GetObjectFromJson<List<CartItem>>(SessionCartKey) ?? new List<CartItem>();
@@ -37,10 +38,27 @@ namespace CourseWork.Controllers
 
             if (existingItem != null)
             {
-                existingItem.Quantity += quantity;
+                var newQuantity = existingItem.Quantity + quantity;
+                if (newQuantity > MaxItemQuantity)
+                {
+                    return Json(new { 
+                        success = false, 
+                        message = $"Ого, скільки піц! 🍕 Не забагато? Максимум {MaxItemQuantity} штук!",
+                        limitExceeded = true 
+                    });
+                }
+                existingItem.Quantity = newQuantity;
             }
             else
             {
+                if (quantity > MaxItemQuantity)
+                {
+                    return Json(new { 
+                        success = false, 
+                        message = $"Ого, скільки піц! 🍕 Не забагато? Максимум {MaxItemQuantity} штук!",
+                        limitExceeded = true 
+                    });
+                }
                 cart.Add(new CartItem
                 {
                     ProductId = product.Id,
@@ -57,10 +75,10 @@ namespace CourseWork.Controllers
             // Return JSON for AJAX requests, or redirect for regular form submissions
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Headers["Accept"].ToString().Contains("application/json"))
             {
-                return Json(new { success = true, message = "Товар додано до кошика!", cartCount = cartCount });
+                return Json(new { success = true, message = "Смакота додана до кошика! 🛒", cartCount = cartCount });
             }
             
-            TempData["Success"] = "Товар додано до кошика!";
+            TempData["Success"] = "Смакота додана до кошика! 🛒";
             return RedirectToAction("Index", "Home");
         }
 
@@ -74,6 +92,20 @@ namespace CourseWork.Controllers
             {
                 cart.Remove(itemToRemove);
                 HttpContext.Session.SetObjectAsJson(SessionCartKey, cart);
+            }
+
+            // AJAX support
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Headers["Accept"].ToString().Contains("application/json"))
+            {
+                var cartCount = cart.Sum(c => c.Quantity);
+                var cartTotal = cart.Sum(c => c.Price * c.Quantity);
+                
+                return Json(new { 
+                    success = true, 
+                    cartCount = cartCount, 
+                    cartTotal = cartTotal.ToString("0.00"),
+                    isEmpty = !cart.Any()
+                });
             }
 
             return RedirectToAction("Index");
@@ -91,6 +123,21 @@ namespace CourseWork.Controllers
                 {
                     cart.Remove(item);
                 }
+                else if (quantity > MaxItemQuantity)
+                {
+                    // Return error for limit exceeded
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Headers["Accept"].ToString().Contains("application/json"))
+                    {
+                        return Json(new { 
+                            success = false, 
+                            message = $"Ого, скільки піц! 🍕 Не забагато? Максимум {MaxItemQuantity} штук!",
+                            limitExceeded = true,
+                            maxQuantity = MaxItemQuantity
+                        });
+                    }
+                    TempData["Error"] = $"Максимум {MaxItemQuantity} одиниць одного товару!";
+                    return RedirectToAction("Index");
+                }
                 else
                 {
                     item.Quantity = quantity;
@@ -98,8 +145,25 @@ namespace CourseWork.Controllers
                 HttpContext.Session.SetObjectAsJson(SessionCartKey, cart);
             }
 
+            // AJAX support
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Headers["Accept"].ToString().Contains("application/json"))
+            {
+                 var cartCount = cart.Sum(c => c.Quantity);
+                 var cartTotal = cart.Sum(c => c.Price * c.Quantity);
+                 var itemTotal = (item != null && quantity > 0) ? (item.Price * item.Quantity).ToString("0.00") : "0.00";
+                 var isRemoved = (item != null && quantity <= 0) || item == null;
+
+                 return Json(new { 
+                    success = true, 
+                    cartCount = cartCount, 
+                    cartTotal = cartTotal.ToString("0.00"),
+                    itemTotal = itemTotal,
+                    isRemoved = isRemoved,
+                    isEmpty = !cart.Any()
+                });
+            }
+
             return RedirectToAction("Index");
         }
     }
 }
-

@@ -43,17 +43,15 @@
                             <td class="cart-item-name">@item.Name</td>
                             <td class="cart-item-price">@item.Price.ToString("0.00") ₴</td>
                             <td>
-                                <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" class="d-inline">
-                                    <input type="hidden" name="productId" value="@item.ProductId" />
-                                    <input type="number" name="quantity" value="@item.Quantity" min="1" class="quantity-input" onchange="this.form.submit()">
-                                </form>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <button class="btn btn-sm btn-outline-secondary btn-cart-action" data-action="decrease" data-product-id="@item.ProductId">-</button>
+                                    <input type="text" class="form-control quantity-input mx-2 text-center" style="width: 50px;" value="@item.Quantity" data-product-id="@item.ProductId" readonly>
+                                    <button class="btn btn-sm btn-outline-secondary btn-cart-action" data-action="increase" data-product-id="@item.ProductId">+</button>
+                                </div>
                             </td>
-                            <td class="cart-item-price">@((item.Price * item.Quantity).ToString("0.00")) ₴</td>
+                            <td class="cart-item-price item-total">@((item.Price * item.Quantity).ToString("0.00")) ₴</td>
                             <td>
-                                <form asp-controller="Cart" asp-action="RemoveFromCart" method="post" class="d-inline">
-                                    <input type="hidden" name="productId" value="@item.ProductId" />
-                                    <button type="submit" class="btn btn-danger btn-sm">Видалити</button>
-                                </form>
+                                <button class="btn btn-danger btn-sm btn-cart-action" data-action="remove" data-product-id="@item.ProductId">Видалити</button>
                             </td>
                         </tr>
                     }

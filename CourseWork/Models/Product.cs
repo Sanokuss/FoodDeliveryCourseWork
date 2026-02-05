@@ -15,6 +15,11 @@ namespace CourseWork.Models
         public int CategoryId { get; set; }
         [ForeignKey("CategoryId")]
         public Category? Category { get; set; }
+        
+        public int RestaurantId { get; set; }
+        [ForeignKey("RestaurantId")]
+        public Restaurant? Restaurant { get; set; }
+        
         public bool IsNew { get; set; } = false;
         public bool IsBestSeller { get; set; } = false;
     }
