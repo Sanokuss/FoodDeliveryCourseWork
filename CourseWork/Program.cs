@@ -52,6 +52,13 @@ namespace CourseWork
             .AddDefaultTokenProviders()
             .AddErrorDescriber<CourseWork.Utility.UkrainianIdentityErrorDescriber>();
 
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromDays(30);
+                options.SlidingExpiration = true;
+                options.Cookie.IsEssential = true;
+            });
+
             // Register Repositories
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();

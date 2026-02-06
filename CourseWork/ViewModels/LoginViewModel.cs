@@ -15,7 +15,7 @@ namespace CourseWork.ViewModels
         public string Password { get; set; } = string.Empty;
 
         [Display(Name = "Запам'ятати мене")]
-        public bool RememberMe { get; set; }
+        public bool RememberMe { get; set; } = true;
         
         [Display(Name = "Повернутись до")]
         public string? ReturnUrl { get; set; } = string.Empty;
