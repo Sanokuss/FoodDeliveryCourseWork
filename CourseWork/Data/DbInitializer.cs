@@ -9,23 +9,8 @@ namespace CourseWork.Data
     {
         public static async Task Initialize(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
-            // Start with EnsureCreated
-            await context.Database.EnsureCreatedAsync();
-
-            // Self-healing: Check if tables verifyable exist
-            try
-            {
-                // Try to access a table. If it throws (e.g. invalid object name), we recreate.
-                // Check Restaurants (application specific) instead of Roles (Identity specific)
-                // Also check for new column Calories to force update
-                var dummy = await context.Products.Where(p => p.Calories >= 0).FirstOrDefaultAsync();
-            }
-            catch (Exception ex)
-            {
-                // Log error or just recreate
-                await context.Database.EnsureDeletedAsync();
-                await context.Database.EnsureCreatedAsync();
-            }
+            // Apply migrations (updates database schema without losing data)
+            await context.Database.MigrateAsync();
 
             // Create Roles
             if (!await roleManager.RoleExistsAsync("Admin")) await roleManager.CreateAsync(new IdentityRole("Admin"));
