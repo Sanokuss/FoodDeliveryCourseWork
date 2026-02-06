@@ -35,12 +35,14 @@ namespace CourseWork
             if (string.IsNullOrEmpty(connectionString) || connectionString == "InMemory")
             {
                 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseInMemoryDatabase("FoodDeliveryDb"));
+                    options.UseInMemoryDatabase("FoodDeliveryDb")
+                           .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning)));
             }
             else
             {
                 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseNpgsql(connectionString));
+                    options.UseNpgsql(connectionString)
+                           .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning)));
             }
 
             // Add Identity
