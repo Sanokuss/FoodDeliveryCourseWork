@@ -15,9 +15,10 @@ namespace CourseWork.Data
             {
                 await context.Database.MigrateAsync();
                 
-                // FIX: Manually add missing columns that weren't in original migration
+                // FIX: Manually add missing tables/columns that weren't in original migration
                 try
                 {
+                    // Add missing columns
                     await context.Database.ExecuteSqlRawAsync(@"
                         ALTER TABLE ""AspNetUsers"" 
                         ADD COLUMN IF NOT EXISTS ""TotalSpent"" DECIMAL(18,2) DEFAULT 0;
@@ -26,8 +27,20 @@ namespace CourseWork.Data
                         ALTER TABLE ""Orders"" 
                         ADD COLUMN IF NOT EXISTS ""DiscountAmount"" DECIMAL(18,2) DEFAULT 0;
                     ");
+                    
+                    // Create UserPromotions table if not exists
+                    await context.Database.ExecuteSqlRawAsync(@"
+                        CREATE TABLE IF NOT EXISTS ""UserPromotions"" (
+                            ""Id"" SERIAL PRIMARY KEY,
+                            ""ApplicationUserId"" TEXT NOT NULL,
+                            ""PromotionId"" INTEGER NOT NULL,
+                            ""IsUsed"" BOOLEAN DEFAULT FALSE,
+                            CONSTRAINT ""FK_UserPromotions_AspNetUsers"" FOREIGN KEY (""ApplicationUserId"") REFERENCES ""AspNetUsers""(""Id"") ON DELETE CASCADE,
+                            CONSTRAINT ""FK_UserPromotions_Promotions"" FOREIGN KEY (""PromotionId"") REFERENCES ""Promotions""(""Id"") ON DELETE CASCADE
+                        );
+                    ");
                 }
-                catch { /* Columns might already exist or not PostgreSQL */ }
+                catch { /* Tables/Columns might already exist or not PostgreSQL */ }
             }
             else
             {
