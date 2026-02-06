@@ -14,6 +14,16 @@ namespace CourseWork.Data
             if (context.Database.IsRelational())
             {
                 await context.Database.MigrateAsync();
+                
+                // FIX: Manually add missing columns that weren't in original migration
+                try
+                {
+                    await context.Database.ExecuteSqlRawAsync(@"
+                        ALTER TABLE ""AspNetUsers"" 
+                        ADD COLUMN IF NOT EXISTS ""TotalSpent"" DECIMAL(18,2) DEFAULT 0;
+                    ");
+                }
+                catch { /* Column might already exist or not PostgreSQL */ }
             }
             else
             {
