@@ -3,6 +3,7 @@ using CourseWork.Models;
 using CourseWork.Repositories;
 using CourseWork.Utility;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CourseWork.Controllers
 {
@@ -31,7 +32,7 @@ namespace CourseWork.Controllers
             ViewBag.SelectedCategoryId = categoryId;
 
             // Start with all products
-            IEnumerable<Product> products = _productRepo.GetAll().ToList(); // Materialize to memory for smart search
+            IEnumerable<Product> products = _productRepo.GetAll(includeProperties: "Category,Restaurant").ToList(); // Materialize to memory for smart search
             
             // Filter by category
             if (categoryId.HasValue && categoryId.Value > 0)
@@ -65,69 +66,83 @@ namespace CourseWork.Controllers
             }
 
             // SMART SEARCH LOGIC 🧠
+            // SMART SEARCH LOGIC 🧠
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                string term = searchTerm.Trim().ToLower();
-                
-                // 1. Standard "Contains" search
-                var directMatches = products.Where(p => 
-                    p.Name.ToLower().Contains(term) || 
-                    (p.Description != null && p.Description.ToLower().Contains(term)) ||
-                    (p.Category != null && p.Category.Name.ToLower().Contains(term))
-                ).ToList();
+                var searchTerms = new List<string>();
+                string originalTerm = searchTerm.Trim().ToLower();
+                searchTerms.Add(originalTerm);
 
-                if (directMatches.Any())
+                // 1. Keyboard Layout Fix (e.g., "ghbds" -> "привіт", "gbwwf" -> "піцца")
+                string fixedLayoutTerm = KeyboardLayoutConverter.FixLayout(originalTerm);
+                if (!string.Equals(fixedLayoutTerm, originalTerm, StringComparison.OrdinalIgnoreCase))
                 {
-                    products = directMatches;
+                    searchTerms.Add(fixedLayoutTerm);
+                }
+
+                // 2. Dictionary Mapping (English/Russian -> Ukrainian)
+                var mapping = new Dictionary<string, string> {
+                    { "pizza", "піца" }, { "пицца", "піца" }, 
+                    { "burger", "бургер" }, { "бургеры", "бургер" },
+                    { "sushi", "суші" }, { "суши", "суші" }, { "роллы", "суші" },
+                    { "salat", "салат" }, { "drink", "напої" }, 
+                    { "coke", "coca-cola" }, { "pepsi", "coca-cola" }, 
+                    { "margarita", "маргарита" }, { "pepperoni", "пепероні" },
+                    { "cheese", "сир" }, { "water", "вода" }, { "вода", "вода" }
+                };
+
+                // Check mappings for all current terms
+                var mappedTerms = new List<string>();
+                foreach (var term in searchTerms)
+                {
+                    foreach (var key in mapping.Keys)
+                    {
+                        // Use Fuzzy matching for dictionary keys too! (e.g. "pizaa" -> match "pizza" -> map to "піца")
+                        if (FuzzySharp.Fuzz.Ratio(term, key) > 85 || term.Contains(key)) 
+                        {
+                            mappedTerms.Add(mapping[key]);
+                        }
+                    }
+                }
+                searchTerms.AddRange(mappedTerms);
+                searchTerms = searchTerms.Distinct().ToList();
+
+                // 3. Perform Fuzzy Search against Products
+                // We score each product against the BEST matching search term
+                var searchResults = products.Select(p => new
+                {
+                    Product = p,
+                    Score = searchTerms.Max(term => 
+                    {
+                        var nameScore = Math.Max(
+                            FuzzySharp.Fuzz.PartialRatio(term, p.Name.ToLower()), 
+                            FuzzySharp.Fuzz.Ratio(term, p.Name.ToLower())
+                        );
+                        
+                        var categoryScore = p.Category != null ? 
+                            FuzzySharp.Fuzz.PartialRatio(term, p.Category.Name.ToLower()) : 0;
+                            
+                        var descScore = p.Description != null ? 
+                            FuzzySharp.Fuzz.PartialRatio(term, p.Description.ToLower()) : 0;
+
+                        // Prioritize Name matches, then Category, then Description
+                        return Math.Max(nameScore, Math.Max(categoryScore, descScore));
+                    })
+                })
+                .Where(x => x.Score > 60) // Threshold for "good enough" match
+                .OrderByDescending(x => x.Score)
+                .Select(x => x.Product)
+                .ToList();
+
+                if (searchResults.Any())
+                {
+                    products = searchResults;
                 }
                 else
                 {
-                    // 2. Try Dictionary Mapping (English -> Ukrainian)
-                    var mapping = new Dictionary<string, string> {
-                        { "pizza", "піца" }, { "burger", "бургер" }, { "sushi", "суші" }, 
-                        { "salat", "салат" }, { "drink", "напої" }, { "coke", "coca-cola" },
-                        { "pepsi", "coca-cola" }, { "margarita", "маргарита" }, { "pepperoni", "пепероні" },
-                        { "cheese", "сир" }, { "water", "вода" }
-                    };
-
-                    string mappedTerm = null;
-                    foreach(var key in mapping.Keys)
-                    {
-                        if (term.Contains(key)) 
-                        {
-                            mappedTerm = mapping[key];
-                            break;
-                        }
-                    }
-
-                    if (mappedTerm != null)
-                    {
-                        products = products.Where(p => 
-                            p.Name.ToLower().Contains(mappedTerm) || 
-                            (p.Category != null && p.Category.Name.ToLower().Contains(mappedTerm))
-                        ).ToList();
-                    }
-                    else
-                    {
-                        // 3. Fuzzy Search (Levenshtein) - Last Resort for Typos
-                        var fuzzyMatches = products.Where(p => 
-                            ComputeLevenshteinDistance(term, p.Name.ToLower()) <= 3 // Allow up to 3 errors
-                        ).ToList();
-
-                        if (fuzzyMatches.Any())
-                        {
-                            products = fuzzyMatches;
-                        }
-                        else
-                        {
-                            products = new List<Product>(); // No results found
-                        }
-                    }
+                    products = new List<Product>();
                 }
             }
-
-            // Include category for display (already in memory objects usually, but kept for consistency)
-            // products is already List<Product>
 
             // Get cart count for badge (Keep existing logic)
             var cart = HttpContext.Session.GetObjectFromJson<List<ViewModels.CartItem>>(SessionCartKey) ?? new List<ViewModels.CartItem>();
@@ -142,37 +157,13 @@ namespace CourseWork.Controllers
             return View(products);
         }
 
-        // Helper: Levenshtein Distance
-        private static int ComputeLevenshteinDistance(string s, string t)
-        {
-            int n = s.Length;
-            int m = t.Length;
-            var d = new int[n + 1, m + 1];
-
-            if (n == 0) return m;
-            if (m == 0) return n;
-
-            for (int i = 0; i <= n; d[i, 0] = i++) { }
-            for (int j = 0; j <= m; d[0, j] = j++) { }
-
-            for (int i = 1; i <= n; i++)
-            {
-                for (int j = 1; j <= m; j++)
-                {
-                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
-                    d[i, j] = Math.Min(
-                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
-                        d[i - 1, j - 1] + cost);
-                }
-            }
-            return d[n, m];
-        }
-
         [HttpGet]
-        public IActionResult GetProductDetails(int id)
+        public async Task<IActionResult> GetProductDetails(int id)
         {
-            var product = _productRepo.GetAll(includeProperties: "Category,Restaurant")
-                            .FirstOrDefault(p => p.Id == id);
+            // Optimization: Async call
+            var product = await _productRepo.GetAll(includeProperties: "Category,Restaurant")
+                            .AsQueryable()
+                            .FirstOrDefaultAsync(p => p.Id == id);
             
             if (product == null)
             {

@@ -10,7 +10,15 @@ namespace CourseWork.Data
         public static async Task Initialize(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             // Apply migrations (updates database schema without losing data)
-            await context.Database.MigrateAsync();
+            // ONLY if not in memory
+            if (context.Database.IsRelational())
+            {
+                await context.Database.MigrateAsync();
+            }
+            else
+            {
+                await context.Database.EnsureCreatedAsync(); 
+            }
 
             // Create Roles
             if (!await roleManager.RoleExistsAsync("Admin")) await roleManager.CreateAsync(new IdentityRole("Admin"));
@@ -110,7 +118,7 @@ namespace CourseWork.Data
                     // Desserts - Sweet Dreams
                     new Product { Name = "Тірамісу", Description = "Італійський десерт з маскарпоне, кавою та печивом савоярді.", Price = 140, CategoryId = cats["Десерти"], RestaurantId = rests["Sweet Dreams"], ImageUrl = "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=800&q=80", Calories = 350, Weight = 150 },
                     new Product { Name = "Чізкейк Нью-Йорк", Description = "Класичний вершковий чізкейк на пісочній основі.", Price = 130, CategoryId = cats["Десерти"], RestaurantId = rests["Sweet Dreams"], ImageUrl = "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=800&q=80", IsBestSeller = true, Calories = 400, Weight = 160 },
-                    new Product { Name = "Брауні", Description = "Шоколадний десерт з вологою серединкою та волоськими горіхами.", Price = 110, CategoryId = cats["Десерти"], RestaurantId = rests["Sweet Dreams"], ImageUrl = "https://images.unsplash.com/photo-1606313564200-e75d5e30476d?auto=format&fit=crop&w=800&q=80", Calories = 450, Weight = 120 },
+                    new Product { Name = "Брауні", Description = "Шоколадний десерт з вологою серединкою та волоськими горіхами.", Price = 110, CategoryId = cats["Десерти"], RestaurantId = rests["Sweet Dreams"], ImageUrl = "https://images.unsplash.com/photo-1564355808539-22fda3d53193?auto=format&fit=crop&w=800&q=80", Calories = 450, Weight = 120 },
                     
                     // Salads - Green Salad
                     new Product { Name = "Грецький салат", Description = "Свіжі огірки, помідори, оливки Каламата, сир фета, орегано.", Price = 120, CategoryId = cats["Салати"], RestaurantId = rests["Green Salad"], ImageUrl = "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80", Calories = 200, Weight = 250 },
@@ -137,6 +145,15 @@ namespace CourseWork.Data
                     // New reliable URL
                     margherita.ImageUrl = "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=800&q=80"; 
                     context.Products.Update(margherita);
+                    await context.SaveChangesAsync();
+                }
+
+                // FIX: Ensure Brownie has a good image
+                var brownie = await context.Products.FirstOrDefaultAsync(p => p.Name == "Брауні");
+                if (brownie != null)
+                {
+                    brownie.ImageUrl = "https://images.unsplash.com/photo-1564355808539-22fda3d53193?auto=format&fit=crop&w=800&q=80";
+                    context.Products.Update(brownie);
                     await context.SaveChangesAsync();
                 }
             }

@@ -181,6 +181,13 @@ namespace CourseWork.Controllers
                 return RedirectToAction("Users");
             }
 
+            // --- SECURITY FIX: Prevent removing admin role from Main Admin ---
+            if (!enable && role == "Admin" && (user.Email == "admin@fooddelivery.com" || user.UserName == "admin@fooddelivery.com"))
+            {
+                TempData["Error"] = "Не можна забрати права у головного адміністратора!";
+                return RedirectToAction("Users");
+            }
+
             IdentityResult result = IdentityResult.Success;
             if (enable)
             {
@@ -219,6 +226,43 @@ namespace CourseWork.Controllers
             }
 
             return RedirectToAction("Users");
+        }
+        [HttpGet]
+        public async Task<IActionResult> EditUser(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditUser(string id, string fullName)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.FullName = fullName;
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                TempData["Success"] = "Дані користувача оновлено!";
+                return RedirectToAction("Users");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return View(user);
         }
     }
 }

@@ -24,5 +24,12 @@ namespace CourseWork.ViewModels
         [Required(ErrorMessage = "Будь ласка, оберіть спосіб оплати! 💸")]
         [Display(Name = "Спосіб оплати")]
         public string PaymentMethod { get; set; } = "Card"; // Default to Card
+
+        public decimal TotalAmount { get; set; }
+        public decimal DiscountAmount { get; set; }
+        public string? AppliedPromoCode { get; set; }
+
+        [Display(Name = "Промокод")]
+        public string? ManualPromoCode { get; set; }
     }
 }

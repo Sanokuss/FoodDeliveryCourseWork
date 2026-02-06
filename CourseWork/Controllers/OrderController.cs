@@ -48,6 +48,9 @@ namespace CourseWork.Controllers
             }
 
             var model = new CheckoutViewModel();
+            decimal cartTotal = cart.Sum(c => c.Price * c.Quantity);
+            model.TotalAmount = cartTotal;
+            model.DiscountAmount = 0;
 
             if (User.Identity.IsAuthenticated)
             {
@@ -57,6 +60,57 @@ namespace CourseWork.Controllers
                     model.CustomerName = user.FullName ?? "";
                     model.CustomerPhone = user.PhoneNumber ?? "";
                     model.CustomerAddress = user.Address ?? "";
+
+                    // CHECK FOR PROMOTIONS (Manual + Auto)
+                    Promotion? bestPromo = null;
+
+                    // 1. Check Automatic (Assigned)
+                    var userPromoLink = await _db.UserPromotions
+                        .Include(up => up.Promotion)
+                        .Where(up => up.ApplicationUserId == user.Id && !up.IsUsed && up.Promotion.IsActive)
+                        .OrderByDescending(up => up.Promotion.DiscountPercent) // Get best discount
+                        .FirstOrDefaultAsync();
+
+                    if (userPromoLink != null) 
+                    {
+                        bestPromo = userPromoLink.Promotion;
+                    }
+
+                    // 2. Check Manual Input
+                    if (!string.IsNullOrEmpty(model.ManualPromoCode))
+                    {
+                        var manualPromo = await _db.Promotions
+                            .FirstOrDefaultAsync(p => p.PromoCode == model.ManualPromoCode.ToUpper() && p.IsActive);
+                        
+                        if (manualPromo != null)
+                        {
+                            // Use manual if better or equal
+                            if (bestPromo == null || (manualPromo.DiscountPercent > bestPromo.DiscountPercent))
+                            {
+                                bestPromo = manualPromo;
+                                // If validation succeeded, show success message specific to manual code
+                                ViewBag.PromoMessage = $"Промокод '{manualPromo.PromoCode}' успішно застосовано! 🎉";
+                            }
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("ManualPromoCode", "Промокод не знайдено або він не активний 😢");
+                        }
+                    }
+
+                    // Apply Best Promo
+                    if (bestPromo != null && bestPromo.DiscountPercent.HasValue)
+                    {
+                        decimal discount = cartTotal * (bestPromo.DiscountPercent.Value / 100m);
+                        model.DiscountAmount = discount;
+                        model.TotalAmount = cartTotal - discount;
+                        model.AppliedPromoCode = bestPromo.PromoCode ?? bestPromo.Title;
+                        
+                        if (string.IsNullOrEmpty(model.ManualPromoCode)) // Only show auto message if manual wasn't entered
+                        {
+                             ViewBag.PromoMessage = $"Ваша персональна знижка '{bestPromo.Title}' (-{bestPromo.DiscountPercent}%) активована!";
+                        }
+                    }
                 }
             }
 
@@ -85,12 +139,15 @@ namespace CourseWork.Controllers
                 CustomerName = model.CustomerName,
                 CustomerPhone = model.CustomerPhone,
                 CustomerAddress = model.CustomerAddress,
-                TotalAmount = cart.Sum(c => c.Price * c.Quantity),
-                OrderStatus = "Pending",
-                OrderDate = DateTime.Now
+                OrderDate = DateTime.Now,
+                OrderStatus = "Pending"
             };
 
-            // Link to User if authenticated
+            decimal cartTotal = cart.Sum(c => c.Price * c.Quantity);
+            decimal discountAmount = 0;
+            UserPromotion? usedPromo = null;
+
+            // Link to User if authenticated & Apply Promo
             if (User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.GetUserAsync(User);
@@ -98,18 +155,77 @@ namespace CourseWork.Controllers
                 {
                     order.ApplicationUserId = user.Id;
 
-                    // Optional: Update user profile if empty
+                    // RE-CHECK PROMOTIONS (Security - Auto + Manual)
+                    Promotion? bestPromoToUse = null;
+                    UserPromotion? userPromoLinkToMarkUsed = null;
+
+                    // 1. Check Automatic
+                    var autoPromoLink = await _db.UserPromotions
+                        .Include(up => up.Promotion)
+                        .Where(up => up.ApplicationUserId == user.Id && !up.IsUsed && up.Promotion.IsActive)
+                        .OrderByDescending(up => up.Promotion.DiscountPercent)
+                        .FirstOrDefaultAsync();
+                    
+                    if (autoPromoLink != null)
+                    {
+                        bestPromoToUse = autoPromoLink.Promotion;
+                        userPromoLinkToMarkUsed = autoPromoLink;
+                    }
+
+                    // 2. Check Manual
+                    if (!string.IsNullOrEmpty(model.ManualPromoCode))
+                    {
+                        var manualPromo = await _db.Promotions
+                            .FirstOrDefaultAsync(p => p.PromoCode == model.ManualPromoCode.ToUpper() && p.IsActive);
+                         
+                        if (manualPromo != null)
+                        {
+                             if (bestPromoToUse == null || manualPromo.DiscountPercent > bestPromoToUse.DiscountPercent)
+                             {
+                                 bestPromoToUse = manualPromo;
+                                 userPromoLinkToMarkUsed = null; // Manual code doesn't consume a "UserPromotion" link usually, or we'd need to find it?
+                                 // NOTE: If manual codes are one-time use per user, we need logic here. 
+                                 // For now, assuming manual codes are generic (like SEASON10) or we don't track usage count yet.
+                             }
+                        }
+                    }
+
+                    if (bestPromoToUse != null && bestPromoToUse.DiscountPercent.HasValue)
+                    {
+                        discountAmount = cartTotal * (bestPromoToUse.DiscountPercent.Value / 100m);
+                        
+                        // If it came from a UserPromotion link (personal assigned), mark it used
+                        if (userPromoLinkToMarkUsed != null)
+                        {
+                             userPromoLinkToMarkUsed.IsUsed = true;
+                             _db.UserPromotions.Update(userPromoLinkToMarkUsed);
+                        }
+                    }
+
+                    // Update User Profile
                     bool userUpdated = false;
                     if (string.IsNullOrEmpty(user.FullName)) { user.FullName = model.CustomerName; userUpdated = true; }
                     if (string.IsNullOrEmpty(user.PhoneNumber)) { user.PhoneNumber = model.CustomerPhone; userUpdated = true; }
                     if (string.IsNullOrEmpty(user.Address)) { user.Address = model.CustomerAddress; userUpdated = true; }
                     
+                    // LOYALTY LOGIC: Update Spend & Assign Rewards
+                    decimal finalAmount = cartTotal - discountAmount;
+                    user.TotalSpent += finalAmount;
+                    userUpdated = true;
+
+                    // Example Loyalty: Spent > 1000 -> Get "Loyalty 5%" if doesn't have it
+                    // Spent > 5000 -> Get "Loyalty 10%"
+                    await CheckAndAssignLoyalty(user);
+
                     if (userUpdated)
                     {
                         await _userManager.UpdateAsync(user);
                     }
                 }
             }
+
+            order.TotalAmount = cartTotal - discountAmount;
+            order.DiscountAmount = discountAmount;
 
             _orderRepo.Add(order);
             _db.SaveChanges(); // Save to generate ID
@@ -251,6 +367,133 @@ namespace CourseWork.Controllers
             }
 
             return View(order);
+        }
+        private async Task CheckAndAssignLoyalty(ApplicationUser user)
+        {
+            // Simple Loyalty Rule:
+            // > 1000 UAH -> Assign "Loyalty 5%" (Id 1 assumption or lookup)
+            // > 5000 UAH -> Assign "Loyalty 10%" (Id 2 assumption or lookup)
+            
+            // For MVP, we'll check if "Loyalty Bonus" exists and give it if > 1000 spent
+            if (user.TotalSpent > 1000)
+            {
+                // Check if user already got this promo
+                var loyaltyPromo = await _db.Promotions.FirstOrDefaultAsync(p => p.Title == "Loyalty Bonus");
+                if (loyaltyPromo == null)
+                {
+                    // Auto-create if not exists (for demo)
+                    loyaltyPromo = new Promotion 
+                    { 
+                        Title = "Loyalty Bonus", 
+                        DiscountPercent = 10, 
+                        Description = "Знижка за лояльність (>1000 грн)", 
+                        ImageUrl = "https://cdn-icons-png.flaticon.com/512/616/616554.png",
+                        PromoCode = "LOYALTY10" // Fixed: Added required PromoCode
+                    };
+                    _db.Promotions.Add(loyaltyPromo);
+                    await _db.SaveChangesAsync();
+                }
+
+                // Check if already assigned (Used or Unused)
+                bool alreadyAssigned = await _db.UserPromotions.AnyAsync(up => up.ApplicationUserId == user.Id && up.PromotionId == loyaltyPromo.Id);
+                
+                if (!alreadyAssigned)
+                {
+                    _db.UserPromotions.Add(new UserPromotion
+                    {
+                        ApplicationUserId = user.Id,
+                        PromotionId = loyaltyPromo.Id,
+                        IsUsed = false
+                    });
+                     // Note: SaveChanges called in main flow, but adding to context is enough here if main flow saves.
+                     // Actually main flow calls _db.SaveChanges() before Payment. user update calls UpdateAsync.
+                     // We need to save UserPromotions here to be safe.
+                     await _db.SaveChangesAsync();
+                }
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> ValidatePromoCode([FromBody] PromoValidationRequest request)
+        {
+            var cart = HttpContext.Session.GetObjectFromJson<List<CartItem>>(SessionCartKey) ?? new List<CartItem>();
+            if (!cart.Any())
+            {
+                return Json(new { success = false, message = "Кошик порожній! 🛒" });
+            }
+
+            if (string.IsNullOrWhiteSpace(request?.PromoCode))
+            {
+                return Json(new { success = false, message = "Введіть код!" });
+            }
+
+            string code = request.PromoCode.Trim().ToUpper();
+            
+            // Check manual promo
+            var manualPromo = await _db.Promotions
+                .FirstOrDefaultAsync(p => p.PromoCode == code && p.IsActive);
+
+            if (manualPromo == null)
+            {
+                // Funny error messages
+                string[] errors = { 
+                    "Так просто на клавіатурі наклацав? 😉", 
+                    "Цей код з майбутнього? Бо зараз він не працює 🔮", 
+                    "Спроба хороша, але ні 🚫",
+                    "Хм... Може іншою мовою? 🌍"
+                };
+                var random = new Random();
+                string errorMsg = errors[random.Next(errors.Length)];
+                
+                return Json(new { success = false, message = errorMsg });
+            }
+
+            // Calculate impact
+            decimal cartTotal = cart.Sum(c => c.Price * c.Quantity);
+            decimal discount = 0;
+            string title = manualPromo.Title;
+
+            if (manualPromo.DiscountPercent.HasValue)
+            {
+                discount = cartTotal * (manualPromo.DiscountPercent.Value / 100m);
+            }
+
+            // Check if user has a BETTER auto-promo
+            if (User.Identity.IsAuthenticated)
+            {
+                 var user = await _userManager.GetUserAsync(User);
+                 if (user != null)
+                 {
+                    var autoPromoLink = await _db.UserPromotions
+                        .Include(up => up.Promotion)
+                        .Where(up => up.ApplicationUserId == user.Id && !up.IsUsed && up.Promotion.IsActive)
+                        .OrderByDescending(up => up.Promotion.DiscountPercent)
+                        .FirstOrDefaultAsync();
+
+                    if (autoPromoLink != null && autoPromoLink.Promotion.DiscountPercent > manualPromo.DiscountPercent)
+                    {
+                         return Json(new { 
+                            success = true, 
+                            message = $"Ваша персональна знижка '{autoPromoLink.Promotion.Title}' (-{autoPromoLink.Promotion.DiscountPercent}%) вигідніша за цей код!",
+                            isBetterAutoExists = true,
+                            discountAmount = cartTotal * (autoPromoLink.Promotion.DiscountPercent.Value / 100m)
+                        });
+                    }
+                 }
+            }
+
+            return Json(new { 
+                success = true, 
+                message = $"Промокод '{manualPromo.PromoCode}' застосовано! 🎉",
+                discountAmount = discount,
+                newTotal = cartTotal - discount,
+                promoTitle = title,
+                percent = manualPromo.DiscountPercent
+            });
+        }
+
+        public class PromoValidationRequest
+        {
+            public string PromoCode { get; set; }
         }
     }
 }

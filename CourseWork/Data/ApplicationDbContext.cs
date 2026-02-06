@@ -17,6 +17,7 @@ namespace CourseWork.Data
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Restaurant> Restaurants { get; set; }
         public DbSet<Promotion> Promotions { get; set; }
+        public DbSet<UserPromotion> UserPromotions { get; set; }
     }
 }
 

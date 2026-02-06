@@ -14,6 +14,8 @@ namespace CourseWork.Models
         public string CustomerAddress { get; set; } = string.Empty;
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalAmount { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal DiscountAmount { get; set; } = 0;
         public string OrderStatus { get; set; } = "Pending";
         public string? TransactionId { get; set; }
         public DateTime OrderDate { get; set; } = DateTime.Now;

@@ -39,8 +39,8 @@
     </section>
 
     <!-- Categories -->
-    <div class="mb-5" id="categories">
-        <h3 class="mb-4 text-center" style="font-weight: 700;">Категорії</h3>
+    <div class="mb-4" id="categories">
+        <h3 class="mb-3 text-center" style="font-weight: 700;">Категорії</h3>
         <div class="categories-wrapper justify-content-center">
              <a href="@Url.Action("Index", "Home")#categories" class="category-card @(ViewBag.SelectedCategoryId == null ? "active" : "")" data-category-id="">
                 <span class="category-name">Всі</span>
@@ -58,11 +58,9 @@
     </div>
 
     <!-- Products -->
-    <div class="mb-5">
-    <!-- Products -->
-    <div class="mb-5">
+    <div>
         <!-- Sorting Bar (Centered & Styled) -->
-        <div class="d-flex justify-content-center mb-5 pb-3">
+        <div class="d-flex justify-content-center mb-4 pb-2">
              <form method="get" asp-action="Index" id="sortForm" class="d-flex align-items-center"
                    style="background: var(--surface-color); padding: 8px 16px; border-radius: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.03);">
                 

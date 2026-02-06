@@ -1,0 +1,35 @@
+@using Microsoft.AspNetCore.Identity
+@model ApplicationUser
+
+@{
+    ViewData["Title"] = "Редагувати користувача";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/order.css" asp-append-version="true" />
+}
+
+<div class="container fade-in">
+    <h1 class="mb-4 checkout-header">Редагувати користувача</h1>
+    
+    <div class="card glass-card p-4 mx-auto" style="max-width: 600px;">
+        <form asp-action="EditUser" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            
+            <div class="mb-3">
+                <label class="form-label text-muted">Email (не змінюється)</label>
+                <input type="text" class="form-control" value="@Model.Email" disabled />
+            </div>
+
+            <div class="mb-4">
+                <label for="fullName" class="form-label fw-bold">Прізвище та ім'я</label>
+                <input type="text" id="fullName" name="fullName" class="form-control" value="@Model.FullName" required />
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end">
+                <a asp-action="Users" class="btn btn-secondary">Скасувати</a>
+                <button type="submit" class="btn btn-primary">Зберегти</button>
+            </div>
+        </form>
+    </div>
+</div>

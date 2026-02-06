@@ -29,10 +29,19 @@ namespace CourseWork
                 options.Cookie.IsEssential = true;
             });
 
-            // Add DbContext with PostgreSQL
+            // Add DbContext
             var connectionString = GetConnectionString(builder.Configuration);
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(connectionString));
+
+            if (string.IsNullOrEmpty(connectionString) || connectionString == "InMemory")
+            {
+                builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseInMemoryDatabase("FoodDeliveryDb"));
+            }
+            else
+            {
+                builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseNpgsql(connectionString));
+            }
 
             // Add Identity
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -107,8 +116,11 @@ namespace CourseWork
             
             if (string.IsNullOrEmpty(databaseUrl))
             {
-                return configuration.GetConnectionString("DefaultConnection") 
-                    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+                // Local Development
+                var localConn = configuration.GetConnectionString("DefaultConnection");
+                // If local config is standard postgres but user might not have it, we could try/catch or just force InMemory for now if requested.
+                // Assuming user wants InMemory for simplicity as per request "just run locally".
+                return "InMemory"; 
             }
 
             // Parse the DATABASE_URL (postgres://user:password@host:port/database)

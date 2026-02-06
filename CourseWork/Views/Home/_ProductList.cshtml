@@ -20,9 +20,15 @@
                             @product.Restaurant.Name
                         </p>
                     }
+                    
+                     <div class="d-flex gap-3 mb-2 text-muted small">
+                        <span title="Калорійність"><i class="bi bi-fire"></i> 🔥 @product.Calories ккал</span>
+                        <span title="Вага"><i class="bi bi-bag"></i> ⚖️ @product.Weight г</span>
+                    </div>
+
                     <p class="food-desc">@product.Description</p>
                     <div class="food-footer">
-                        <div class="food-price"><span>₴</span>@product.Price.ToString("0.00")</div>
+                        <div class="food-price">@product.Price.ToString("0.00") <span style="font-size: 0.8em;">грн</span></div>
                         
                         <form asp-controller="Cart" asp-action="AddToCart" method="post" class="add-to-cart-form" onclick="event.stopPropagation()">
                             @Html.AntiForgeryToken()

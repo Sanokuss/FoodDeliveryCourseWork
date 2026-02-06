@@ -448,7 +448,7 @@ ul {
     grid-template-columns: 1.2fr 1fr;
     gap: 40px;
     align-items: center;
-    padding: 60px 0;
+    padding: 20px 0;
     min-height: 500px;
 }
 

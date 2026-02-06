@@ -5,6 +5,22 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/order.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <style>
+        .highlight-success {
+            animation: highlightPulse 1s ease-out;
+            background-color: #d4edda !important;
+        }
+        @@keyframes highlightPulse {
+            0% { background-color: #f8f9fa; transform: scale(1); }
+            50% { background-color: #d4edda; transform: scale(1.02); }
+            100% { background-color: #d4edda; transform: scale(1); }
+        }
+        .loading-promo {
+            background-image: url('data:image/svg+xml,...'); /* Simplify or use border-color change */
+            opacity: 0.7;
+        }
+    </style>
 }
 
 <div class="checkout-container">
@@ -57,6 +73,48 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                 </div>
                 <span asp-validation-for="CustomerAddress" class="text-danger small"></span>
+            </div>
+
+            <!-- Manual Promo Code -->
+             <div class="form-group floating-group mt-4">
+                <input asp-for="ManualPromoCode" class="form-control floating-input" placeholder=" " style="text-transform: uppercase;" />
+                <label asp-for="ManualPromoCode" class="floating-label">Є промокод?</label>
+                <div class="input-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="order-summary mt-4 p-3 rounded" style="background-color: #f8f9fa;">
+                @if (Model.DiscountAmount > 0)
+                {
+                    <div class="d-flex justify-content-between text-muted text-decoration-line-through small">
+                        <span>Сума замовлення:</span>
+                        <span>@((Model.TotalAmount + Model.DiscountAmount).ToString("0.00")) ₴</span>
+                    </div>
+                    <div class="d-flex justify-content-between text-success fw-bold my-1">
+                        <span>Знижка (@Model.AppliedPromoCode):</span>
+                        <span>-@Model.DiscountAmount.ToString("0.00") ₴</span>
+                    </div>
+                    @if (ViewBag.PromoMessage != null)
+                    {
+                        <div class="alert alert-success mt-2 mb-2 p-2 small text-center">
+                            @ViewBag.PromoMessage
+                        </div>
+                    }
+                    <hr class="my-2" />
+                    <div class="d-flex justify-content-between fs-4 fw-bold" style="color: var(--primary-color);">
+                        <span>До сплати:</span>
+                        <span>@Model.TotalAmount.ToString("0.00") ₴</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex justify-content-between fs-4 fw-bold" style="color: var(--primary-color);">
+                        <span>До сплати:</span>
+                        <span>@Model.TotalAmount.ToString("0.00") ₴</span>
+                    </div>
+                }
             </div>
 
             <!-- Payment Method Selection -->
