@@ -29,8 +29,13 @@
 
                     <div class="mb-3">
                         <label asp-for="Password" class="form-label text-muted">Пароль</label>
-                        <input asp-for="Password" class="form-control" type="password" placeholder="Введіть пароль" required 
-                               style="background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 12px; padding: 12px;" />
+                        <div class="position-relative">
+                            <input asp-for="Password" class="form-control" type="password" placeholder="Введіть пароль" required id="loginPassword"
+                                   style="background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 12px; padding: 12px; padding-right: 45px;" />
+                            <button type="button" class="btn position-absolute" style="right: 5px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #ea7c69; font-size: 1.2em;" onclick="togglePassword('loginPassword', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
 
@@ -51,4 +56,19 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function togglePassword(inputId, btn) {
+            var input = document.getElementById(inputId);
+            var icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+    </script>
 }

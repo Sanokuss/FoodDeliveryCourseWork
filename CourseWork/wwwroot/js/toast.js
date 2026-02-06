@@ -37,6 +37,17 @@ const ToastManager = (function () {
 
     function show(message, type = 'info', duration = 4000) {
         init();
+
+        // Prevent duplicate toasts - if same message is already showing, skip
+        const existingToasts = container.querySelectorAll('.toast');
+        for (const existingToast of existingToasts) {
+            const existingMessage = existingToast.querySelector('.toast-message');
+            if (existingMessage && existingMessage.textContent === message) {
+                console.log('Duplicate toast prevented:', message);
+                return null; // Don't show duplicate
+            }
+        }
+
         console.log('Toast container:', container);
 
         const toast = document.createElement('div');
