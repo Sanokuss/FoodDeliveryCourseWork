@@ -1,0 +1,207 @@
+/* --- Product Details Modal --- */
+.modal-glass .modal-content {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border-radius: 32px;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .modal-glass .modal-content {
+    background: rgba(26, 28, 36, 0.85);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.product-modal-img-wrapper {
+    height: 100%;
+    min-height: 500px;
+    position: relative;
+    overflow: hidden;
+}
+
+.product-modal-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s ease;
+}
+
+.product-modal-img:hover {
+    transform: scale(1.05);
+}
+
+.product-restaurant-tag {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 700;
+    color: #1a1c24;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transform: translateY(0);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.product-restaurant-tag:hover {
+    transform: translateY(-5px);
+}
+
+.modal-details-content {
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    /* Slightly larger */
+    height: 44px;
+    border-radius: 50%;
+    background: #ff4757;
+    /* Bright Red */
+    border: 2px solid white;
+    /* White border for contrast */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    color: white;
+}
+
+.modal-close-btn:hover {
+    transform: rotate(90deg) scale(1.1);
+    background: #ff6b81;
+    box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
+}
+
+.modal-close-btn svg {
+    stroke: currentColor;
+    stroke-width: 2.5;
+    width: 24px;
+    height: 24px;
+}
+
+.info-pill-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 40px;
+}
+
+.info-pill {
+    background: rgba(234, 124, 105, 0.08);
+    /* Transparent primary */
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.info-pill:hover {
+    background: rgba(234, 124, 105, 0.15);
+    transform: translateY(-3px);
+    border-color: rgba(234, 124, 105, 0.3);
+}
+
+.info-pill-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.info-pill-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.quantity-control {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 50px;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+}
+
+[data-theme="dark"] .quantity-control {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.qty-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qty-btn:hover {
+    transform: scale(1.1);
+    color: var(--primary-color);
+}
+
+.qty-btn:active {
+    transform: scale(0.9);
+}
+
+[data-theme="dark"] .qty-btn {
+    background: var(--surface-color);
+    color: white;
+}
+
+.qty-input {
+    width: 50px;
+    background: transparent;
+    border: none;
+    text-align: center;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text-color);
+    margin: 0 8px;
+}
+
+.qty-input:focus {
+    outline: none;
+}
+
+/* Modal Animation */
+.modal.fade .modal-dialog {
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1) translateY(0);
+}

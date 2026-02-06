@@ -21,46 +21,51 @@ namespace CourseWork.Repositories
             dbSet.Add(entity);
         }
 
-        public T? Get(Expression<Func<T, bool>> filter)
+        public T? Get(Expression<Func<T, bool>> filter, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
-            query = query.Where(filter);
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProp);
+                }
+            }
             return query.FirstOrDefault();
         }
 
-        public IEnumerable<T> GetAll()
+        public IEnumerable<T> GetAll(string? includeProperties = null)
         {
-            // Include Category and Restaurant for Product entities
-            if (typeof(T) == typeof(Product))
+            IQueryable<T> query = dbSet;
+            if (!string.IsNullOrEmpty(includeProperties))
             {
-                var productDbSet = _db.Set<Product>();
-                var products = productDbSet
-                    .Include(p => p.Category)
-                    .Include(p => p.Restaurant)
-                    .ToList();
-                return products.Cast<T>();
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProp);
+                }
             }
-            
-            return dbSet.ToList();
+            return query.ToList();
         }
 
-        public IEnumerable<T> GetAll(Expression<Func<T, bool>> filter)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>> filter, string? includeProperties = null)
         {
-            // Include Category and Restaurant for Product entities
-            if (typeof(T) == typeof(Product))
+            IQueryable<T> query = dbSet;
+            if (filter != null)
             {
-                var productDbSet = _db.Set<Product>();
-                // For Product, we need to apply filter after loading
-                // This is less efficient but works correctly
-                var allProducts = productDbSet
-                    .Include(p => p.Category)
-                    .Include(p => p.Restaurant)
-                    .ToList();
-                var compiledFilter = filter.Compile();
-                return allProducts.Where(p => compiledFilter((T)(object)p)).Cast<T>();
+                query = query.Where(filter);
             }
-            
-            return dbSet.Where(filter).ToList();
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProp);
+                }
+            }
+            return query.ToList();
         }
 
         public void Remove(T entity)

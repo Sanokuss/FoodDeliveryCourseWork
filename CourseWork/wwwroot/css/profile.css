@@ -47,6 +47,22 @@
     font-size: 0.95rem;
 }
 
+.btn-edit-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.btn-edit-profile:hover {
+    color: #d66a59;
+    text-decoration: underline;
+}
+
 .profile-level {
     display: flex;
     align-items: center;
@@ -101,7 +117,8 @@
 
 .stat-card {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 1rem;
     padding: 1.25rem 1.5rem;
     background: var(--surface-color);
@@ -115,6 +132,13 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
+.stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+}
+
 .stat-icon {
     width: 56px;
     height: 56px;
@@ -124,6 +148,27 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+}
+
+.info-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 50%;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+}
+
+.info-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--primary-color);
+    opacity: 1;
 }
 
 .stat-icon.spent {

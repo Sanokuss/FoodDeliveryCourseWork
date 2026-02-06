@@ -6,6 +6,8 @@
     <title>@ViewData["Title"] - FoodDelivery</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/mobile-fixes.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modal.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -25,11 +27,11 @@
                 <li><a asp-controller="Home" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")">Головна</a></li>
                 <li><a asp-controller="Restaurants" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Restaurants" ? "active" : "")">Ресторани</a></li>
                 <li><a asp-controller="Promotions" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Promotions" ? "active" : "")">Акції</a></li>
-                @if (User.IsInRole("Admin"))
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                 {
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin" || ViewContext.RouteData.Values["Controller"]?.ToString() == "Restaurants" || ViewContext.RouteData.Values["Controller"]?.ToString() == "Promotions" ? "active" : "")" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Адмін
+                            @(User.IsInRole("Admin") ? "Адмін" : "Менеджер")
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                             <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index">Дашборд</a></li>
@@ -39,7 +41,10 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" asp-controller="Admin" asp-action="Products">📦 Товари</a></li>
                             <li><a class="dropdown-item" asp-controller="Admin" asp-action="Orders">📝 Замовлення</a></li>
-                            <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">👥 Користувачі</a></li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">👥 Користувачі</a></li>
+                            }
                         </ul>
                     </li>
                 }
@@ -49,7 +54,7 @@
             <div class="nav-actions">
                 <!-- Theme Toggle -->
                 <button id="themeToggle" class="theme-toggle" title="Змінити тему">
-                   <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                   <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
                 </button>
 
@@ -115,6 +120,10 @@
                 {
                     <a asp-controller="Admin" asp-action="Index" class="mobile-nav-link">⚙️ Адмін</a>
                 }
+                else if (User.IsInRole("Manager"))
+                {
+                    <a asp-controller="Admin" asp-action="Index" class="mobile-nav-link">🛠️ Менеджер</a>
+                }
             }
             else
             {
@@ -131,9 +140,13 @@
     </main>
 
     <!-- Footer -->
+    <!-- Footer -->
     <footer class="text-center py-4 mt-5 border-top" style="border-color: var(--border-color) !important;">
         <p class="text-muted mb-0">&copy; 2026 BodanFood. Всі права захищено.</p>
     </footer>
+    
+    <!-- Global Modal Container -->
+    <div id="modal-container"></div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

@@ -43,12 +43,9 @@
     function applyTheme(theme) {
         if (theme === 'dark') {
             body.setAttribute('data-theme', 'dark');
-            sunIcon.style.display = 'block';
-            moonIcon.style.display = 'none';
+            // CSS handles icon visibility/animation now
         } else {
-            body.removeAttribute('data-theme'); // Default is light
-            sunIcon.style.display = 'none';
-            moonIcon.style.display = 'block';
+            body.removeAttribute('data-theme');
         }
     }
 
@@ -61,8 +58,14 @@
     const searchInput = document.querySelector('input[name="searchTerm"]');
     if (searchInput) {
         const placeholderText = "Що бажаєте з'їсти?";
-        // Also try: "Суші", "Піца", "Бургери"... for more dynamic effect
-        const phrases = ["Що бажаєте з'їсти?", "Спробуйте: Піца", "Спробуйте: Суші", "Спробуйте: Бургери"];
+        const phrases = [
+            "Що бажаєте з'їсти?",
+            "Не їж мене, з'їж піцу",
+            "Знайди своє щастя (суші)",
+            "Ковбаски... багато ковбасок",
+            "Напиши 'Margarita' — я знайду",
+            "Введи 'сир' і посміхнісь"
+        ];
         let phraseIndex = 0;
         let charIndex = 0;
         let isDeleting = false;
@@ -261,6 +264,24 @@
                 // Update Active State
                 categoryLinks.forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
+
+                // Clear Search Input
+                const searchInput = document.querySelector('input[name="searchTerm"]');
+                if (searchInput) {
+                    searchInput.value = '';
+                }
+
+                // Update Sort Form Category ID
+                const sortCategoryInput = document.querySelector('input[name="categoryId"]');
+                if (sortCategoryInput) {
+                    sortCategoryInput.value = categoryId;
+                }
+
+                // Reset Sort to Default
+                const sortSelect = document.querySelector('select[name="sortOrder"]');
+                if (sortSelect) {
+                    sortSelect.value = "";
+                }
 
                 // Add loading state opacity
                 productsContainer.style.opacity = '0.5';

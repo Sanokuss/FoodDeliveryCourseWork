@@ -59,9 +59,27 @@
 
     <!-- Products -->
     <div class="mb-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 style="font-weight: 700;">Популярні страви</h3>
-            <a href="#" style="color: var(--primary-color); font-weight: 600;">Дивитись всі &rarr;</a>
+    <!-- Products -->
+    <div class="mb-5">
+        <!-- Sorting Bar (Centered & Styled) -->
+        <div class="d-flex justify-content-center mb-5 pb-3">
+             <form method="get" asp-action="Index" id="sortForm" class="d-flex align-items-center"
+                   style="background: var(--surface-color); padding: 8px 16px; border-radius: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.03);">
+                
+                <input type="hidden" name="searchTerm" value="@ViewBag.SearchTerm" />
+                <input type="hidden" name="categoryId" value="@ViewBag.SelectedCategoryId" />
+                
+                <label class="me-2 text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Сортувати:</label>
+                <select name="sortOrder" class="form-select form-select-sm border-0 bg-transparent shadow-none fw-bold" 
+                        onchange="document.getElementById('sortForm').submit()" 
+                        style="width: auto; cursor: pointer; color: var(--primary-color); padding-right: 30px; min-width: 180px;">
+                    <!option value="" @(ViewBag.CurrentSort == null ? "selected" : "")>За замовчуванням</!option>
+                    <!option value="price_asc" @(ViewBag.CurrentSort == "price_asc" ? "selected" : "")>Від дешевшого до дорожчого</!option>
+                    <!option value="price_desc" @(ViewBag.CurrentSort == "price_desc" ? "selected" : "")>Від дорожчого до дешевшого</!option>
+                    <!option value="newest" @(ViewBag.CurrentSort == "newest" ? "selected" : "")>Спочатку новинки</!option>
+                    <!option value="bestseller" @(ViewBag.CurrentSort == "bestseller" ? "selected" : "")>За популярністю</!option>
+                </select>
+            </form>
         </div>
 
         <div id="products-container">
@@ -69,3 +87,66 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // ... (Existing Modal Scripts) ...
+        function openProductModal(id) {
+            // Fetch modal content
+            fetch(`@Url.Action("GetProductDetails", "Home")?id=${id}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Failed to load");
+                    return response.text();
+                })
+                .then(html => {
+                    const container = document.getElementById('modal-container');
+                    container.innerHTML = html;
+                    
+                    // Initialize and show modal
+                    const modalElement = document.getElementById('productDetailsModal');
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                    
+                    // Handle form submit
+                    const form = modalElement.querySelector('form');
+                    form.addEventListener('submit', function(e) {
+                         // Standard submit
+                    });
+                })
+                .catch(err => console.error(err));
+        }
+
+        // Dynamic Price Update
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('qty-btn')) {
+                // Allow inline onclick to fire first (stepUp/Down), then update price
+                setTimeout(() => updateModalPrice(e.target), 10);
+            }
+        });
+
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('qty-input')) {
+                updateModalPrice(e.target);
+            }
+        });
+
+        function updateModalPrice(target) {
+            const modal = document.getElementById('productDetailsModal');
+            if (!modal) return;
+            
+            const priceEl = modal.querySelector('#modal-total-price');
+            const input = modal.querySelector('input[name="quantity"]');
+            
+            if (priceEl && input) {
+                const basePrice = parseFloat(priceEl.dataset.basePrice);
+                const qty = parseInt(input.value);
+                if (!isNaN(basePrice) && !isNaN(qty)) {
+                    const total = basePrice * qty;
+                    priceEl.textContent = total.toFixed(0) + ' ₴';
+                }
+            }
+        }
+
+    </script>
+}
+

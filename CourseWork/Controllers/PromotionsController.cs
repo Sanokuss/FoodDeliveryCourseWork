@@ -41,7 +41,7 @@ namespace CourseWork.Controllers
         }
 
         // GET: Promotions/Create
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public IActionResult Create()
         {
             return View();
@@ -62,7 +62,7 @@ namespace CourseWork.Controllers
         }
 
         // GET: Promotions/Edit/5
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -112,7 +112,7 @@ namespace CourseWork.Controllers
         }
 
         // GET: Promotions/Delete/5
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)

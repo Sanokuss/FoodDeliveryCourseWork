@@ -1,183 +1,283 @@
-/* Стилі для сторінок оформлення замовлення */
+/* Стилі для сторінок оформлення замовлення (Modern Premium Design) */
 
-
-.checkout-header {
-    margin-bottom: 2rem;
-    color: var(--text-color);
-}
-
-.checkout-form {
-    background: var(--surface-color);
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    animation: fadeIn 0.6s ease;
-    transition: box-shadow 0.3s ease;
-}
-
-.checkout-form:hover {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.checkout-form .form-label {
-    font-weight: 500;
-    color: var(--text-color);
-    margin-bottom: 0.5rem;
-}
-
-.checkout-form .form-control {
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    padding: 0.75rem;
-    transition: all 0.3s ease;
-}
-
-.checkout-form .form-control:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(234, 124, 105, 0.25);
-    transform: scale(1.02);
-    transition: all 0.3s ease;
-    outline: none;
-}
-
-.checkout-form .form-control:invalid:not(:placeholder-shown) {
-    border-color: var(--danger-color);
-    animation: shake 0.5s ease;
-}
-
-.checkout-form .form-control:valid:not(:placeholder-shown) {
-    border-color: var(--success-color);
-}
-
-.checkout-form textarea {
-    resize: vertical;
-    min-height: 100px;
-}
-
-.checkout-actions {
-    margin-top: 1.5rem;
+/* Загальний контейнер */
+.checkout-container {
+    padding: 3rem 1rem;
+    min-height: 80vh;
     display: flex;
-    gap: 1rem;
+    justify-content: center;
+    align-items: flex-start;
 }
 
-.checkout-actions .btn {
-    padding: 0.75rem 2rem;
-    border-radius: 25px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.checkout-actions .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.checkout-actions .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
+/* Картка оформлення */
+.checkout-card {
+    background: var(--surface-color);
+    width: 100%;
+    max-width: 550px;
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
     position: relative;
     overflow: hidden;
 }
 
-.checkout-actions .btn-primary::before {
-    content: '';
+/* Payment Methods */
+.payment-option {
+    flex: 1;
+    cursor: pointer;
+    position: relative;
+}
+
+.payment-option input {
     position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
+    opacity: 0;
+}
+
+.payment-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: var(--bg-color);
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.5s;
 }
 
-.checkout-actions .btn-primary:hover::before {
-    left: 100%;
+.payment-card .icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 
-.alert-danger {
-    animation: shake 0.5s ease;
-    border-radius: 10px;
+.payment-card .title {
+    font-weight: 600;
+    color: var(--text-color);
 }
 
-/* Стилі для сторінки підтвердження */
-.confirmation-container {
-    text-align: center;
-    padding: 3rem 1rem;
+.payment-card .subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
 }
 
-.confirmation-icon {
-    margin-bottom: 2rem;
-    animation: scaleIn 0.5s ease;
+.payment-option input:checked+.payment-card {
+    border-color: var(--primary-color);
+    background: rgba(234, 124, 105, 0.05);
+    /* Assuming primary color-ish */
+    box-shadow: 0 4px 12px rgba(234, 124, 105, 0.15);
 }
 
-@keyframes scaleIn {
+.payment-option:hover .payment-card {
+    transform: translateY(-2px);
+    border-color: var(--text-muted);
+}
+
+.payment-option input:checked+.payment-card .title {
+    color: var(--primary-color);
+}
+
+
+/* Анімація появи */
+.fade-up {
+    animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+@keyframes fadeUp {
     from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Анімація галочки */
+.scale-in-bounce {
+    animation: scaleInBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    opacity: 0;
+    transform: scale(0);
+}
+
+@keyframes scaleInBounce {
+    0% {
         transform: scale(0);
         opacity: 0;
     }
 
-    to {
+    60% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    100% {
         transform: scale(1);
         opacity: 1;
     }
 }
 
-.confirmation-title {
-    color: var(--success-color);
-    margin-bottom: 1rem;
-    font-weight: 700;
+/* Заголовок */
+.checkout-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
 }
 
-.confirmation-message {
+.checkout-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+}
+
+.checkout-header p {
     color: var(--text-muted);
     font-size: 1.1rem;
-    margin-bottom: 2rem;
 }
 
-.order-details-card {
-    max-width: 500px;
-    margin: 2rem auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+/* Floating Groups */
+.floating-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.floating-input {
+    width: 100%;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-color);
+    padding: 1rem 1rem 1rem 3rem;
+    /* padding-left for icon */
+    font-size: 1rem;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+    height: auto;
+}
+
+.address-input {
+    min-height: 120px;
+}
+
+.floating-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+    /* Assuming primary is reddish */
+    outline: none;
+    transform: translateY(-2px);
+}
+
+.floating-input:valid:not(:placeholder-shown) {
+    border-color: var(--success-color);
+    /* Green border for valid */
+}
+
+.floating-input.is-invalid {
+    border-color: var(--danger-color);
+    animation: shake 0.4s ease;
+}
+
+/* Floating Label */
+.floating-label {
+    position: absolute;
+    left: 3rem;
+    top: 1rem;
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: 0.2s ease all;
     background: var(--surface-color);
+    /* щоб перекривати бордер якщо треба, або var(--bg-color) */
+    padding: 0 0.5rem;
+    font-size: 1rem;
 }
 
-.order-details-card .card-title {
-    color: var(--text-color);
+.floating-input:focus~.floating-label,
+.floating-input:not(:placeholder-shown)~.floating-label,
+.floating-input.has-value~.floating-label {
+    top: -0.7rem;
+    left: 0.8rem;
+    font-size: 0.85rem;
+    color: var(--primary-color);
     font-weight: 600;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--border-color);
 }
 
-.order-details-card p {
-    margin-bottom: 0.75rem;
-    color: var(--text-color);
+/* Input Icon */
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 1.1rem;
+    color: var(--text-muted);
+    transition: 0.3s ease;
 }
 
-.order-details-card strong {
-    color: var(--text-color);
+.top-icon {
+    top: 1.1rem;
+    /* for textarea */
 }
 
-.status-badge {
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
+.floating-input:focus~.input-icon {
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+/* Hint Text */
+.start-hint {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+}
+
+/* Actions */
+.checkout-actions {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.btn-pay {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #ff8e8e 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+}
+
+.btn-pay:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5);
+}
+
+.btn-pay:active {
+    transform: scale(0.98);
+}
+
+.btn-back {
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.8rem;
     font-weight: 500;
-}
-
-/* Стилі для сторінки помилки */
-.failure-container {
+    color: var(--text-muted);
+    background: transparent;
+    transition: all 0.3s ease;
     text-align: center;
-    padding: 3rem 1rem;
+    text-decoration: none;
 }
 
-.failure-icon {
-    margin-bottom: 2rem;
-    animation: shake 0.5s ease;
+.btn-back:hover {
+    background: var(--bg-color);
+    color: var(--text-color);
+    border-color: var(--text-muted);
 }
 
+/* Shake Animation */
 @keyframes shake {
 
     0%,
@@ -185,50 +285,49 @@
         transform: translateX(0);
     }
 
-    10%,
-    30%,
-    50%,
-    70%,
-    90% {
-        transform: translateX(-10px);
-    }
-
     20%,
+    60% {
+        transform: translateX(-5px);
+    }
+
     40%,
-    60%,
     80% {
-        transform: translateX(10px);
+        transform: translateX(5px);
     }
 }
 
-.failure-title {
-    color: var(--danger-color);
-    margin-bottom: 1rem;
-    font-weight: 700;
+/* Confirmation & Failure pages (keep or slightly refresh) */
+/* Можна залишити попередні стилі для Confirmation/Failure, або адаптувати їх так само */
+.confirmation-container,
+.failure-container {
+    text-align: center;
+    padding: 4rem 1rem;
 }
 
-.failure-message {
-    color: var(--text-muted);
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
+.failure-container {
+    animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    opacity: 0;
 }
 
-.failure-actions {
-    margin-top: 2rem;
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
+.confirmation-icon svg,
+.failure-icon svg {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
 }
 
-.failure-actions .btn {
-    padding: 0.75rem 2rem;
-    border-radius: 25px;
-    font-weight: 500;
-    transition: all 0.3s ease;
+.order-details-card {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin: 2rem auto;
+    max-width: 600px;
+    padding: 2rem;
+    text-align: left;
 }
 
-.failure-actions .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+/* Responsive */
+@media (max-width: 576px) {
+    .checkout-card {
+        padding: 2rem 1.5rem;
+    }
 }

@@ -1,0 +1,169 @@
+/* Mobile Fixes - Validated */
+@media (max-width: 768px) {
+
+    /* 1. Theme Toggle Visibility */
+    #themeToggle {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        color: #333 !important;
+        /* Dark icon */
+        background: rgba(255, 255, 255, 0.9) !important;
+        border: 1px solid #ddd !important;
+        width: 40px !important;
+        height: 40px !important;
+        margin-right: 8px !important;
+        border-radius: 50% !important;
+        z-index: 9999 !important;
+        position: relative !important;
+    }
+
+    /* 0. Global Overflow Fix */
+    body,
+    html {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        position: relative !important;
+    }
+
+    #themeToggle svg {
+        width: 20px !important;
+        height: 20px !important;
+        display: block !important;
+        color: #333 !important;
+    }
+
+    /* 2. Nav Actions container */
+    .nav-actions {
+        display: flex !important;
+        gap: 2px !important;
+        /* Minimal gap */
+        align-items: center !important;
+        width: auto !important;
+        overflow: visible !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Cart Icon */
+    .nav-actions .cart-link,
+    .nav-actions a[href*="Cart"] {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        width: 36px !important;
+        /* Slightly smaller touch target */
+        height: 36px !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Header container fix */
+    .navbar,
+    nav.navbar {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 8px 8px !important;
+        /* Reduced padding */
+        width: 100% !important;
+        flex-wrap: nowrap !important;
+    }
+
+    /* Shrink Brand on Mobile to fit */
+    .navbar-brand {
+        font-size: 1.1rem !important;
+        margin-right: 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        flex-shrink: 1 !important;
+    }
+
+    /* 3. Pizza Background Visibility */
+    .hero-image-wrapper {
+        position: absolute !important;
+        /* Moves with content */
+        top: 20px !important;
+        /* Start slightly below top of hero */
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 320px !important;
+        /* Fixed width */
+        height: 320px !important;
+        /* Fixed height - SQUARE */
+        z-index: 0 !important;
+        opacity: 0.15 !important;
+        display: flex !important;
+        margin: 0 !important;
+        pointer-events: none !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .rotating-pizza-container {
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        animation: spin-slow 60s linear infinite !important;
+    }
+
+    .hero-pizza-img {
+        width: 100% !important;
+        height: 100% !important;
+        display: block !important;
+        object-fit: contain !important;
+        /* Keep aspect ratio inside square */
+    }
+
+    /* Define keyframes locally to ensure they exist */
+    @keyframes spin-slow {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* 4. Hide Overlay Text (BodanFood) */
+    .hero-overlay-text {
+        display: none !important;
+    }
+
+    /* 5. Hero Section Overflow - visible */
+    .hero-section {
+        overflow: visible !important;
+        position: relative !important;
+        padding-bottom: 20px !important;
+        background: transparent !important;
+        /* Ensure transparent so fixed pizza shows */
+    }
+
+    /* Ensure categories don't block it */
+    #categories {
+        position: relative !important;
+        z-index: 2 !important;
+        background: transparent !important;
+    }
+
+    /* 6. Content z-index */
+    .hero-content {
+        position: relative !important;
+        z-index: 2 !important;
+    }
+
+    /* 7. Burger Menu */
+    .mobile-menu-btn {
+        display: flex !important;
+        z-index: 9999 !important;
+    }
+
+    /* 8. Search Input Padding */
+    #hero-search input {
+        padding-right: 50px !important;
+        font-size: 14px !important;
+    }
+}

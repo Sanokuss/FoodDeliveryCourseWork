@@ -29,12 +29,12 @@ namespace CourseWork
             });
 
             // Add DbContext
-            // builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+               options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             
             // Use InMemory Database for Testing/Preview
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase("FoodDeliveryDb"));
+            // builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            //     options.UseInMemoryDatabase("FoodDeliveryDb"));
 
             // Add Identity
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>

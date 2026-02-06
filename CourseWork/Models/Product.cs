@@ -22,6 +22,10 @@ namespace CourseWork.Models
         
         public bool IsNew { get; set; } = false;
         public bool IsBestSeller { get; set; } = false;
+
+        // Details for Modal
+        public int Calories { get; set; } // kcal
+        public int Weight { get; set; } // grams
     }
 }
 

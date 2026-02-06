@@ -7,7 +7,7 @@
 }
 
 <div class="container fade-in py-5">
-    <h1 class="mb-4" style="font-weight: 700;">Адмін-панель</h1>
+    <h1 class="mb-4" style="font-weight: 700;">@(User.IsInRole("Admin") ? "Адмін-панель" : "Панель Менеджера")</h1>
 
     <div class="row g-4 mb-5">
         <div class="col-md-3">
@@ -49,7 +49,10 @@
         <div class="d-flex flex-wrap gap-3">
             <a asp-action="Products" class="btn btn-primary rounded-pill px-4">Управління товарами</a>
             <a asp-action="Orders" class="btn btn-info rounded-pill px-4 text-white">Управління замовленнями</a>
-            <a asp-action="Users" class="btn btn-success rounded-pill px-4">Управління користувачами</a>
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Users" class="btn btn-success rounded-pill px-4">Управління користувачами</a>
+            }
         </div>
     </div>
 </div>

@@ -7,46 +7,92 @@
     <link rel="stylesheet" href="~/css/order.css" asp-append-version="true" />
 }
 
-<div class="container fade-in">
-    <h1 class="mb-4 checkout-header">Оформлення замовлення</h1>
-
-    <div class="row">
-        <div class="col-md-8">
-            <form asp-action="PlaceOrder" method="post" class="checkout-form">
-                @if (!ViewData.ModelState.IsValid)
-                {
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong>Помилка!</strong>
-                        <div asp-validation-summary="All" class="mb-0"></div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                }
-
-                <div class="mb-3">
-                    <label asp-for="CustomerName" class="form-label"></label>
-                    <input asp-for="CustomerName" class="form-control" placeholder="Введіть ваше ім'я" required />
-                    <span asp-validation-for="CustomerName" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="CustomerPhone" class="form-label"></label>
-                    <input asp-for="CustomerPhone" class="form-control" placeholder="+380XXXXXXXXX або 0XXXXXXXXX" type="tel" required />
-                    <small class="form-text text-muted">Формат: +380XXXXXXXXX або 0XXXXXXXXX</small>
-                    <span asp-validation-for="CustomerPhone" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="CustomerAddress" class="form-label"></label>
-                    <textarea asp-for="CustomerAddress" class="form-control" rows="3" placeholder="Введіть повну адресу доставки" required></textarea>
-                    <span asp-validation-for="CustomerAddress" class="text-danger"></span>
-                </div>
-
-                <div class="checkout-actions">
-                    <button type="submit" class="btn btn-primary">Перейти до оплати</button>
-                    <a asp-controller="Cart" asp-action="Index" class="btn btn-secondary">Назад до кошика</a>
-                </div>
-            </form>
+<div class="checkout-container">
+    <div class="checkout-card fade-up">
+        <div class="checkout-header">
+            <h1>✨ Оформлення замовлення</h1>
+            <p>Ще трошки, і смакота буде у вас! 🍕</p>
         </div>
+
+        <form asp-action="PlaceOrder" method="post" class="checkout-form">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-exclamation-triangle-fill me-2" viewBox="0 0 16 16">
+                            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                        </svg>
+                        <div>
+                            <strong>Халепа!</strong> Перевірте дані:
+                        </div>
+                    </div>
+                    <div asp-validation-summary="All" class="mt-2 mb-0 small"></div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="form-group floating-group">
+                <input asp-for="CustomerName" class="form-control floating-input" placeholder=" " required />
+                <label asp-for="CustomerName" class="floating-label">Ваше Ім'я</label>
+                <div class="input-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <span asp-validation-for="CustomerName" class="text-danger small"></span>
+            </div>
+
+            <div class="form-group floating-group mt-4">
+                <input asp-for="CustomerPhone" class="form-control floating-input" placeholder=" " type="tel" required />
+                <label asp-for="CustomerPhone" class="floating-label">Телефон</label>
+                <div class="input-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                </div>
+                <small class="text-muted ps-3 start-hint">Формат: +380...</small>
+                <span asp-validation-for="CustomerPhone" class="text-danger small"></span>
+            </div>
+
+            <div class="form-group floating-group mt-4">
+                <textarea asp-for="CustomerAddress" class="form-control floating-input address-input" placeholder=" " rows="3" required></textarea>
+                <label asp-for="CustomerAddress" class="floating-label">Адреса доставки</label>
+                <div class="input-icon top-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                </div>
+                <span asp-validation-for="CustomerAddress" class="text-danger small"></span>
+            </div>
+
+            <!-- Payment Method Selection -->
+            <div class="payment-methods mt-4 mb-4">
+                <label class="form-label mb-3 fw-bold">Спосіб оплати:</label>
+                <div class="d-flex gap-3">
+                    <label class="payment-option">
+                        <input type="radio" asp-for="PaymentMethod" value="Card" checked>
+                        <span class="payment-card">
+                            <span class="icon">💳</span>
+                            <span class="title">Картою</span>
+                            <span class="subtitle">Stripe Secure</span>
+                        </span>
+                    </label>
+                    
+                    <label class="payment-option">
+                        <input type="radio" asp-for="PaymentMethod" value="Cash">
+                        <span class="payment-card">
+                            <span class="icon">💵</span>
+                            <span class="title">Готівкою</span>
+                            <span class="subtitle">При отриманні</span>
+                        </span>
+                    </label>
+                </div>
+                <span asp-validation-for="PaymentMethod" class="text-danger small"></span>
+            </div>
+
+            <div class="checkout-actions">
+                <button type="submit" class="btn btn-primary btn-lg btn-pay">
+                    Оформити замовлення ✨
+                </button>
+                <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary btn-back">
+                    Повернутись до кошика
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 

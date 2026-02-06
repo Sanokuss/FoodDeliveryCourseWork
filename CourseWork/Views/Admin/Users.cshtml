@@ -23,6 +23,14 @@
         </div>
     }
 
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Помилка!</strong> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     <div class="table-responsive">
         <table class="table table-striped">
             <thead>
@@ -46,34 +54,68 @@
                         <td>@(user.FullName ?? "Не вказано")</td>
                         <td>@(user.Address ?? "Не вказано")</td>
                         <td>
-                            @if (isAdmin)
+                            @if (roles.Contains("Admin"))
                             {
-                                <span class="badge bg-danger">Адміністратор</span>
+                                <span class="badge bg-danger mb-1">Адміністратор</span>
                             }
-                            else
+                            @if (roles.Contains("Manager"))
+                            {
+                                <span class="badge bg-primary mb-1">Менеджер</span>
+                            }
+                            @if (!roles.Contains("Admin") && !roles.Contains("Manager"))
                             {
                                 <span class="badge bg-secondary">Користувач</span>
                             }
                         </td>
                         <td>
-                            <form asp-action="ToggleAdminRole" method="post" class="d-inline">
-                                <input type="hidden" name="userId" value="@user.Id" />
-                                <input type="hidden" name="isAdmin" value="@(!isAdmin)" />
-                                @if (isAdmin)
-                                {
-                                    <button type="submit" class="btn btn-sm btn-warning" 
-                                            onclick="return confirm('Ви впевнені, що хочете забрати права адміністратора у цього користувача?');">
-                                        Забрати права адміна
-                                    </button>
-                                }
-                                else
-                                {
-                                    <button type="submit" class="btn btn-sm btn-success"
-                                            onclick="return confirm('Ви впевнені, що хочете надати права адміністратора цьому користувачу?');">
-                                        Зробити адміном
-                                    </button>
-                                }
-                            </form>
+                            <div class="d-flex gap-2">
+                                <!-- Admin Toggle -->
+                                <form asp-action="ToggleRole" 
+                                      asp-route-userId="@user.Id" 
+                                      asp-route-role="Admin" 
+                                      asp-route-enable="@(!isAdmin)" 
+                                      method="post" class="d-inline">
+                                    
+                                    @if (isAdmin)
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Забрати права адміна"
+                                                onclick="return confirm('Забрати права Адміністратора?');">
+                                            - Адмін
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-warning" title="Надати права адміна"
+                                                onclick="return confirm('Надати права Адміністратора?');">
+                                            + Адмін
+                                        </button>
+                                    }
+                                </form>
+
+                                <!-- Manager Toggle -->
+                                @{ var isManager = roles.Contains("Manager"); }
+                                <form asp-action="ToggleRole" 
+                                      asp-route-userId="@user.Id" 
+                                      asp-route-role="Manager" 
+                                      asp-route-enable="@(!isManager)" 
+                                      method="post" class="d-inline">
+                                    
+                                    @if (isManager)
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-primary" title="Забрати права менеджера"
+                                                onclick="return confirm('Забрати права Менеджера?');">
+                                            - Менеджер
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-info" title="Надати права менеджера"
+                                                onclick="return confirm('Надати права Менеджера?');">
+                                            + Менеджер
+                                        </button>
+                                    }
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 }

@@ -1,0 +1,79 @@
+@model CourseWork.Models.Product
+
+<!-- Modal ID managed via JS/Bootstrap -->
+<div class="modal fade modal-glass" id="productDetailsModal" tabindex="-1" aria-labelledby="productDetailsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-body p-0">
+                <button type="button" class="modal-close-btn" data-bs-dismiss="modal" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                
+                <div class="row g-0 h-100">
+                    <!-- Image Side -->
+                    <div class="col-lg-6">
+                        <div class="product-modal-img-wrapper">
+                            <img src="@Model.ImageUrl" class="product-modal-img" alt="@Model.Name">
+                            
+                            @if(Model.Restaurant != null) {
+                                <div class="product-restaurant-tag">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                                    @Model.Restaurant.Name
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    
+                    <!-- Content Side -->
+                    <div class="col-lg-6">
+                        <div class="modal-details-content">
+                            <div class="mb-3">
+                                 @if (Model.IsNew) { <span class="badge bg-info text-dark rounded-pill px-3 py-2 me-1">NEW</span> }
+                                 @if (Model.IsBestSeller) { <span class="badge bg-warning text-dark rounded-pill px-3 py-2 me-1">HIT</span> }
+                                 <span class="badge bg-secondary rounded-pill px-3 py-2">@Model.Category?.Name</span>
+                            </div>
+                            
+                            <h2 class="display-4 fw-bold mb-3" style="letter-spacing: -1px;" id="productDetailsLabel">@Model.Name</h2>
+                            
+                            <p class="lead text-muted mb-5" style="line-height: 1.6;">@Model.Description</p>
+                            
+                            <!-- Info Pills -->
+                            <div class="info-pill-grid">
+                                <div class="info-pill">
+                                    <span class="info-pill-label">Вага</span>
+                                    <span class="info-pill-value">@Model.Weight<small style="font-size: 14px; color: var(--text-muted);">г</small></span>
+                                </div>
+                                <div class="info-pill">
+                                    <span class="info-pill-label">Енергія</span>
+                                    <span class="info-pill-value">@Model.Calories<small style="font-size: 14px; color: var(--text-muted);">ккал</small></span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-auto d-flex align-items-center justify-content-between pt-4 border-top" style="border-color: var(--border-color) !important;">
+                                <div>
+                                    <span class="text-muted small d-block mb-1">Загальна вартість</span>
+                                    <div class="h2 mb-0 fw-bold text-primary text-nowrap" id="modal-total-price" data-base-price="@Model.Price">@Model.Price.ToString("0") ₴</div>
+                                </div>
+                                
+                                <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-flex align-items-center gap-3">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@Model.Id" />
+                                    
+                                    <div class="quantity-control">
+                                        <button class="qty-btn" type="button" onclick="this.nextElementSibling.stepDown()">-</button>
+                                        <input type="number" name="quantity" value="1" min="1" max="10" class="qty-input" readonly>
+                                        <button class="qty-btn" type="button" onclick="this.previousElementSibling.stepUp()">+</button>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary rounded-pill px-4 py-3 fw-bold text-nowrap" style="box-shadow: 0 10px 25px rgba(234, 124, 105, 0.4); transform: translateY(0); transition: all 0.3s ease;">
+                                        В кошик
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -7,6 +7,7 @@ namespace CourseWork.ViewModels
     {
         [Required(ErrorMessage = "Кур'єр питатиме: \"А для кого це?\" Введіть ім'я! 📦")]
         [StringLength(100, MinimumLength = 2, ErrorMessage = "Ім'я занадто коротке чи довге! Від 2 до 100 символів 📏")]
+        [RegularExpression(@"^[a-zA-Zа-яА-ЯіІїЇєЄґҐ\s\-']+$", ErrorMessage = "В імені можуть бути тільки літери. Цифри залиште для номера телефону! ✍️")]
         [Display(Name = "Ім'я")]
         public string CustomerName { get; set; } = string.Empty;
 
@@ -19,5 +20,9 @@ namespace CourseWork.ViewModels
         [StringLength(200, MinimumLength = 10, ErrorMessage = "Адреса занадто коротка — кур'єр заблукає! 🗺️")]
         [Display(Name = "Адреса доставки")]
         public string CustomerAddress { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Будь ласка, оберіть спосіб оплати! 💸")]
+        [Display(Name = "Спосіб оплати")]
+        public string PaymentMethod { get; set; } = "Card"; // Default to Card
     }
 }

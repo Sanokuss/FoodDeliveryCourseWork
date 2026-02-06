@@ -8,7 +8,7 @@ using ProductModel = CourseWork.Models.Product;
 
 namespace CourseWork.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     public class AdminController : Controller
     {
         private readonly IRepository<ProductModel> _productRepo;
@@ -146,6 +146,7 @@ namespace CourseWork.Controllers
             return RedirectToAction("Orders");
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Users()
         {
             var users = _userManager.Users.ToList();
@@ -164,29 +165,57 @@ namespace CourseWork.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ToggleAdminRole(string userId, bool isAdmin)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ToggleRole(string userId, string role, bool enable)
         {
+            if (role != "Admin" && role != "Manager")
+            {
+                TempData["Error"] = $"Невідома роль: {role}";
+                return RedirectToAction("Users");
+            }
+
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return NotFound();
+                TempData["Error"] = "Користувача не знайдено";
+                return RedirectToAction("Users");
             }
 
-            if (isAdmin)
+            IdentityResult result = IdentityResult.Success;
+            if (enable)
             {
-                if (!await _userManager.IsInRoleAsync(user, "Admin"))
+                if (!await _userManager.IsInRoleAsync(user, role))
                 {
-                    await _userManager.AddToRoleAsync(user, "Admin");
-                    TempData["Success"] = "Роль адміністратора додано!";
+                    result = await _userManager.AddToRoleAsync(user, role);
+                    if (result.Succeeded)
+                    {
+                        TempData["Success"] = $"Роль {role} успішно додано!";
+                    }
+                }
+                else
+                {
+                    TempData["Error"] = $"Користувач вже має роль {role} (дія не виконана)";
                 }
             }
             else
             {
-                if (await _userManager.IsInRoleAsync(user, "Admin"))
+                if (await _userManager.IsInRoleAsync(user, role))
                 {
-                    await _userManager.RemoveFromRoleAsync(user, "Admin");
-                    TempData["Success"] = "Роль адміністратора видалено!";
+                    result = await _userManager.RemoveFromRoleAsync(user, role);
+                    if (result.Succeeded)
+                    {
+                        TempData["Success"] = $"Роль {role} успішно видалено!";
+                    }
                 }
+                 else
+                {
+                    TempData["Error"] = $"Користувач не має ролі {role} (дія не виконана)";
+                }
+            }
+
+            if (!result.Succeeded)
+            {
+                TempData["Error"] = $"Помилка: {string.Join(", ", result.Errors.Select(e => e.Description))}";
             }
 
             return RedirectToAction("Users");
