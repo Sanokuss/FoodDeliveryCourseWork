@@ -158,12 +158,10 @@ namespace CourseWork.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetProductDetails(int id)
+        public IActionResult GetProductDetails(int id)
         {
-            // Optimization: Async call
-            var product = await _productRepo.GetAll(includeProperties: "Category,Restaurant")
-                            .AsQueryable()
-                            .FirstOrDefaultAsync(p => p.Id == id);
+            var product = _productRepo.GetAll(includeProperties: "Category,Restaurant")
+                            .FirstOrDefault(p => p.Id == id);
             
             if (product == null)
             {
