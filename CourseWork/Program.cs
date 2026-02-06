@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
+using Npgsql;
 
 namespace CourseWork
 {
@@ -28,13 +29,10 @@ namespace CourseWork
                 options.Cookie.IsEssential = true;
             });
 
-            // Add DbContext
-            // builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-            
-            // Use InMemory Database for Testing/Preview (Works on Render)
+            // Add DbContext with PostgreSQL
+            var connectionString = GetConnectionString(builder.Configuration);
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase("FoodDeliveryDb"));
+                options.UseNpgsql(connectionString));
 
             // Add Identity
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -94,6 +92,33 @@ namespace CourseWork
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
+        }
+
+        private static string GetConnectionString(IConfiguration configuration)
+        {
+            var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+            
+            if (string.IsNullOrEmpty(databaseUrl))
+            {
+                return configuration.GetConnectionString("DefaultConnection") 
+                    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            }
+
+            // Parse the DATABASE_URL (postgres://user:password@host:port/database)
+            var databaseUri = new Uri(databaseUrl);
+            var userInfo = databaseUri.UserInfo.Split(':');
+            var builder = new Npgsql.NpgsqlConnectionStringBuilder
+            {
+                Host = databaseUri.Host,
+                Port = databaseUri.Port,
+                Username = userInfo[0],
+                Password = userInfo[1],
+                Database = databaseUri.LocalPath.TrimStart('/'),
+                SslMode = Npgsql.SslMode.Require,
+                TrustServerCertificate = true 
+            };
+
+            return builder.ToString();
         }
     }
 }
