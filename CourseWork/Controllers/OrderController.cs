@@ -52,7 +52,7 @@ namespace CourseWork.Controllers
             model.TotalAmount = cartTotal;
             model.DiscountAmount = 0;
 
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.GetUserAsync(User);
                 if (user != null)
@@ -60,56 +60,19 @@ namespace CourseWork.Controllers
                     model.CustomerName = user.FullName ?? "";
                     model.CustomerPhone = user.PhoneNumber ?? "";
                     model.CustomerAddress = user.Address ?? "";
+                    model.UserTotalSpent = user.TotalSpent;
 
-                    // CHECK FOR PROMOTIONS (Manual + Auto)
-                    Promotion? bestPromo = null;
-
-                    // 1. Check Automatic (Assigned)
-                    var userPromoLink = await _db.UserPromotions
-                        .Include(up => up.Promotion)
-                        .Where(up => up.ApplicationUserId == user.Id && !up.IsUsed && up.Promotion.IsActive)
-                        .OrderByDescending(up => up.Promotion.DiscountPercent) // Get best discount
-                        .FirstOrDefaultAsync();
-
-                    if (userPromoLink != null) 
+                    // Calculate Loyalty Discount: 1% per 1000 UAH spent, max 10%
+                    int loyaltyPercent = Math.Min(10, (int)(user.TotalSpent / 1000));
+                    model.LoyaltyDiscountPercent = loyaltyPercent;
+                    
+                    if (loyaltyPercent > 0)
                     {
-                        bestPromo = userPromoLink.Promotion;
-                    }
-
-                    // 2. Check Manual Input
-                    if (!string.IsNullOrEmpty(model.ManualPromoCode))
-                    {
-                        var manualPromo = await _db.Promotions
-                            .FirstOrDefaultAsync(p => p.PromoCode == model.ManualPromoCode.ToUpper() && p.IsActive);
-                        
-                        if (manualPromo != null)
-                        {
-                            // Use manual if better or equal
-                            if (bestPromo == null || (manualPromo.DiscountPercent > bestPromo.DiscountPercent))
-                            {
-                                bestPromo = manualPromo;
-                                // If validation succeeded, show success message specific to manual code
-                                ViewBag.PromoMessage = $"Промокод '{manualPromo.PromoCode}' успішно застосовано! 🎉";
-                            }
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("ManualPromoCode", "Промокод не знайдено або він не активний 😢");
-                        }
-                    }
-
-                    // Apply Best Promo
-                    if (bestPromo != null && bestPromo.DiscountPercent.HasValue)
-                    {
-                        decimal discount = cartTotal * (bestPromo.DiscountPercent.Value / 100m);
-                        model.DiscountAmount = discount;
-                        model.TotalAmount = cartTotal - discount;
-                        model.AppliedPromoCode = bestPromo.PromoCode ?? bestPromo.Title;
-                        
-                        if (string.IsNullOrEmpty(model.ManualPromoCode)) // Only show auto message if manual wasn't entered
-                        {
-                             ViewBag.PromoMessage = $"Ваша персональна знижка '{bestPromo.Title}' (-{bestPromo.DiscountPercent}%) активована!";
-                        }
+                        model.LoyaltyDiscountAmount = cartTotal * (loyaltyPercent / 100m);
+                        // Default: toggle OFF, user must enable to apply
+                        model.UsePersonalDiscount = false;
+                        model.DiscountAmount = 0;
+                        model.TotalAmount = cartTotal;
                     }
                 }
             }
@@ -145,82 +108,35 @@ namespace CourseWork.Controllers
 
             decimal cartTotal = cart.Sum(c => c.Price * c.Quantity);
             decimal discountAmount = 0;
-            UserPromotion? usedPromo = null;
 
-            // Link to User if authenticated & Apply Promo
-            if (User.Identity.IsAuthenticated)
+            // Link to User if authenticated & Apply Loyalty Discount
+            if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 var user = await _userManager.GetUserAsync(User);
                 if (user != null)
                 {
                     order.ApplicationUserId = user.Id;
 
-                    // RE-CHECK PROMOTIONS (Security - Auto + Manual)
-                    Promotion? bestPromoToUse = null;
-                    UserPromotion? userPromoLinkToMarkUsed = null;
-
-                    // 1. Check Automatic
-                    var autoPromoLink = await _db.UserPromotions
-                        .Include(up => up.Promotion)
-                        .Where(up => up.ApplicationUserId == user.Id && !up.IsUsed && up.Promotion.IsActive)
-                        .OrderByDescending(up => up.Promotion.DiscountPercent)
-                        .FirstOrDefaultAsync();
-                    
-                    if (autoPromoLink != null)
+                    // Calculate Loyalty Discount: 1% per 1000 UAH spent, max 10%
+                    if (model.UsePersonalDiscount)
                     {
-                        bestPromoToUse = autoPromoLink.Promotion;
-                        userPromoLinkToMarkUsed = autoPromoLink;
-                    }
-
-                    // 2. Check Manual
-                    if (!string.IsNullOrEmpty(model.ManualPromoCode))
-                    {
-                        var manualPromo = await _db.Promotions
-                            .FirstOrDefaultAsync(p => p.PromoCode == model.ManualPromoCode.ToUpper() && p.IsActive);
-                         
-                        if (manualPromo != null)
+                        int loyaltyPercent = Math.Min(10, (int)(user.TotalSpent / 1000));
+                        if (loyaltyPercent > 0)
                         {
-                             if (bestPromoToUse == null || manualPromo.DiscountPercent > bestPromoToUse.DiscountPercent)
-                             {
-                                 bestPromoToUse = manualPromo;
-                                 userPromoLinkToMarkUsed = null; // Manual code doesn't consume a "UserPromotion" link usually, or we'd need to find it?
-                                 // NOTE: If manual codes are one-time use per user, we need logic here. 
-                                 // For now, assuming manual codes are generic (like SEASON10) or we don't track usage count yet.
-                             }
-                        }
-                    }
-
-                    if (bestPromoToUse != null && bestPromoToUse.DiscountPercent.HasValue)
-                    {
-                        discountAmount = cartTotal * (bestPromoToUse.DiscountPercent.Value / 100m);
-                        
-                        // If it came from a UserPromotion link (personal assigned), mark it used
-                        if (userPromoLinkToMarkUsed != null)
-                        {
-                             userPromoLinkToMarkUsed.IsUsed = true;
-                             _db.UserPromotions.Update(userPromoLinkToMarkUsed);
+                            discountAmount = cartTotal * (loyaltyPercent / 100m);
                         }
                     }
 
                     // Update User Profile
-                    bool userUpdated = false;
-                    if (string.IsNullOrEmpty(user.FullName)) { user.FullName = model.CustomerName; userUpdated = true; }
-                    if (string.IsNullOrEmpty(user.PhoneNumber)) { user.PhoneNumber = model.CustomerPhone; userUpdated = true; }
-                    if (string.IsNullOrEmpty(user.Address)) { user.Address = model.CustomerAddress; userUpdated = true; }
+                    if (string.IsNullOrEmpty(user.FullName)) { user.FullName = model.CustomerName; }
+                    if (string.IsNullOrEmpty(user.PhoneNumber)) { user.PhoneNumber = model.CustomerPhone; }
+                    if (string.IsNullOrEmpty(user.Address)) { user.Address = model.CustomerAddress; }
                     
-                    // LOYALTY LOGIC: Update Spend & Assign Rewards
+                    // Update TotalSpent with final amount (after discount)
                     decimal finalAmount = cartTotal - discountAmount;
                     user.TotalSpent += finalAmount;
-                    userUpdated = true;
 
-                    // Example Loyalty: Spent > 1000 -> Get "Loyalty 5%" if doesn't have it
-                    // Spent > 5000 -> Get "Loyalty 10%"
-                    await CheckAndAssignLoyalty(user);
-
-                    if (userUpdated)
-                    {
-                        await _userManager.UpdateAsync(user);
-                    }
+                    await _userManager.UpdateAsync(user);
                 }
             }
 

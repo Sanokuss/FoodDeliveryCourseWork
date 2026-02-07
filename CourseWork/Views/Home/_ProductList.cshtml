@@ -10,6 +10,10 @@
                     <img src="@product.ImageUrl" alt="@product.Name" class="food-img" loading="lazy">
                 </div>
                 <div class="food-card-content">
+                    @if (product.Category != null)
+                    {
+                        <div class="food-category">@product.Category.Name</div>
+                    }
                     <h4 class="food-title">@product.Name</h4>
                     @if (product.Restaurant != null)
                     {
@@ -22,11 +26,22 @@
                     }
                     
                      <div class="d-flex gap-3 mb-2 text-muted small">
-                        <span title="Калорійність"><i class="bi bi-fire"></i> 🔥 @product.Calories ккал</span>
-                        <span title="Вага"><i class="bi bi-bag"></i> ⚖️ @product.Weight г</span>
+                        <span title="Калорійність">🔥 @product.Calories ккал</span>
+                        <span title="Вага">⚖️ @product.Weight г</span>
                     </div>
 
                     <p class="food-desc">@product.Description</p>
+                    
+                    <div class="product-badges">
+                        @if (product.IsBestSeller)
+                        {
+                            <span class="product-badge badge-hit">Хіт</span>
+                        }
+                        @if (product.IsNew)
+                        {
+                            <span class="product-badge badge-new">Новинка</span>
+                        }
+                    </div>
                     <div class="food-footer">
                         <div class="food-price">@product.Price.ToString("0.00") <span style="font-size: 0.8em;">грн</span></div>
                         

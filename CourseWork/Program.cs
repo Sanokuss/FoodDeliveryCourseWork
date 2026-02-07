@@ -30,6 +30,7 @@ namespace CourseWork
             });
 
             // Add DbContext
+            // Add DbContext
             var connectionString = GetConnectionString(builder.Configuration);
 
             if (string.IsNullOrEmpty(connectionString) || connectionString == "InMemory")

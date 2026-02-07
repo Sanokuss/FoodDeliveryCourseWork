@@ -23,6 +23,13 @@ namespace CourseWork.Controllers
             return View(cart);
         }
 
+        [HttpGet]
+        public IActionResult GetCartSidebar()
+        {
+            var cart = HttpContext.Session.GetObjectFromJson<List<CartItem>>(SessionCartKey) ?? new List<CartItem>();
+            return PartialView("_CartSidebar", cart);
+        }
+
         [HttpPost]
         [IgnoreAntiforgeryToken] // Allow AJAX requests without full page reload
         public IActionResult AddToCart(int productId, int quantity = 1)

@@ -47,28 +47,22 @@ namespace CourseWork.Controllers
                 .Take(3)
                 .ToList();
 
-            // Determine user level based on spending
-            string userLevel = "Новачок";
-            int discountPercent = 0;
-            if (totalSpent >= 5000)
+            // Calculate discount: 1% per 1000 UAH spent, max 10%
+            int discountPercent = Math.Min(10, (int)(user.TotalSpent / 1000));
+            
+            // Determine user level based on discount
+            string userLevel = discountPercent switch
             {
-                userLevel = "VIP";
-                discountPercent = 15;
-            }
-            else if (totalSpent >= 2000)
-            {
-                userLevel = "Золотий";
-                discountPercent = 10;
-            }
-            else if (totalSpent >= 500)
-            {
-                userLevel = "Срібний";
-                discountPercent = 5;
-            }
+                >= 10 => "VIP",
+                >= 7 => "Золотий",
+                >= 4 => "Срібний",
+                >= 1 => "Бронзовий",
+                _ => "Новачок"
+            };
 
             ViewBag.User = user;
             ViewBag.Orders = orders;
-            ViewBag.TotalSpent = totalSpent;
+            ViewBag.TotalSpent = user.TotalSpent;
             ViewBag.Promotions = promotions;
             ViewBag.UserLevel = userLevel;
             ViewBag.DiscountPercent = discountPercent;

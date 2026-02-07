@@ -74,6 +74,33 @@
                 </div>
                 <span asp-validation-for="CustomerAddress" class="text-danger small"></span>
             </div>
+            <!-- Personal Loyalty Discount Toggle -->
+            @if (Model.LoyaltyDiscountPercent > 0)
+            {
+                <div class="loyalty-discount-card mt-4 p-3 rounded" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2); border: 2px solid #ff9800;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <span class="fw-bold" style="color: #e65100;">🎁 Персональна знижка</span>
+                            <span class="badge bg-success ms-2">@Model.LoyaltyDiscountPercent%</span>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input" asp-for="UsePersonalDiscount" id="loyaltyToggle" style="width: 3rem; height: 1.5rem;">
+                            <label class="form-check-label" for="loyaltyToggle"></label>
+                        </div>
+                    </div>
+                    <div class="small text-muted mb-2">
+                        Ваші покупки: <strong>@Model.UserTotalSpent.ToString("N0") ₴</strong>
+                        <span class="ms-2">(1% за кожну 1000 ₴, макс. 10%)</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: @(Model.LoyaltyDiscountPercent * 10)%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted mt-1">
+                        <span>0%</span>
+                        <span>10%</span>
+                    </div>
+                </div>
+            }
 
             <!-- Manual Promo Code -->
              <div class="form-group floating-group mt-4">
@@ -85,36 +112,24 @@
             </div>
 
             <!-- Order Summary -->
-            <div class="order-summary mt-4 p-3 rounded" style="background-color: #f8f9fa;">
-                @if (Model.DiscountAmount > 0)
-                {
-                    <div class="d-flex justify-content-between text-muted text-decoration-line-through small">
-                        <span>Сума замовлення:</span>
-                        <span>@((Model.TotalAmount + Model.DiscountAmount).ToString("0.00")) ₴</span>
-                    </div>
-                    <div class="d-flex justify-content-between text-success fw-bold my-1">
-                        <span>Знижка (@Model.AppliedPromoCode):</span>
-                        <span>-@Model.DiscountAmount.ToString("0.00") ₴</span>
-                    </div>
-                    @if (ViewBag.PromoMessage != null)
-                    {
-                        <div class="alert alert-success mt-2 mb-2 p-2 small text-center">
-                            @ViewBag.PromoMessage
-                        </div>
-                    }
-                    <hr class="my-2" />
-                    <div class="d-flex justify-content-between fs-4 fw-bold" style="color: var(--primary-color);">
-                        <span>До сплати:</span>
-                        <span>@Model.TotalAmount.ToString("0.00") ₴</span>
-                    </div>
+            <div class="order-summary mt-4 p-3 rounded" style="background-color: #f8f9fa;" id="orderSummary">
+                @{
+                    var originalTotal = Model.TotalAmount + Model.DiscountAmount;
+                    var showDiscount = Model.UsePersonalDiscount && Model.LoyaltyDiscountPercent > 0;
                 }
-                else
-                {
-                    <div class="d-flex justify-content-between fs-4 fw-bold" style="color: var(--primary-color);">
-                        <span>До сплати:</span>
-                        <span>@Model.TotalAmount.ToString("0.00") ₴</span>
-                    </div>
-                }
+                <div class="d-flex justify-content-between text-muted small" id="originalPriceRow" style="@(showDiscount ? "text-decoration: line-through;" : "display: none;")">
+                    <span>Сума замовлення:</span>
+                    <span id="originalPrice">@originalTotal.ToString("0.00") ₴</span>
+                </div>
+                <div class="d-flex justify-content-between text-success fw-bold my-1" id="discountRow" style="@(showDiscount ? "" : "display: none;")">
+                    <span>Знижка (<span id="discountLabel">@Model.LoyaltyDiscountPercent%</span>):</span>
+                    <span id="discountAmount">-@Model.LoyaltyDiscountAmount.ToString("0.00") ₴</span>
+                </div>
+                <hr class="my-2" id="summaryDivider" style="@(showDiscount ? "" : "display: none;")" />
+                <div class="d-flex justify-content-between fs-4 fw-bold" style="color: var(--primary-color);">
+                    <span>До сплати:</span>
+                    <span id="finalTotal">@Model.TotalAmount.ToString("0.00") ₴</span>
+                </div>
             </div>
 
             <!-- Payment Method Selection -->
@@ -157,5 +172,41 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="~/js/checkout.js" asp-append-version="true"></script>
+    <script>
+        (function() {
+            const toggle = document.getElementById('loyaltyToggle');
+            if (!toggle) return;
+
+            // cartTotal is the ORIGINAL total before any discount
+            const cartTotal = @((Model.TotalAmount + Model.LoyaltyDiscountAmount).ToString(System.Globalization.CultureInfo.InvariantCulture));
+            const discountAmount = @(Model.LoyaltyDiscountAmount.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            const discountPercent = @Model.LoyaltyDiscountPercent;
+
+            function updateSummary() {
+                const useDiscount = toggle.checked;
+                const originalPriceRow = document.getElementById('originalPriceRow');
+                const discountRow = document.getElementById('discountRow');
+                const summaryDivider = document.getElementById('summaryDivider');
+                const finalTotal = document.getElementById('finalTotal');
+
+                if (useDiscount && discountPercent > 0) {
+                    // Show discount UI
+                    originalPriceRow.style.display = '';
+                    originalPriceRow.style.textDecoration = 'line-through';
+                    discountRow.style.display = '';
+                    summaryDivider.style.display = '';
+                    finalTotal.textContent = (cartTotal - discountAmount).toFixed(2) + ' ₴';
+                } else {
+                    // Hide discount UI, show full price
+                    originalPriceRow.style.display = 'none';
+                    discountRow.style.display = 'none';
+                    summaryDivider.style.display = 'none';
+                    finalTotal.textContent = cartTotal.toFixed(2) + ' ₴';
+                }
+            }
+
+            toggle.addEventListener('change', updateSummary);
+        })();
+    </script>
 }
 

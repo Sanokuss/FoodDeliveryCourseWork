@@ -31,5 +31,13 @@ namespace CourseWork.ViewModels
 
         [Display(Name = "Промокод")]
         public string? ManualPromoCode { get; set; }
+
+        // Personal/Loyalty Discount (1% per 1000 UAH spent, max 10%)
+        [Display(Name = "Використати персональну знижку")]
+        public bool UsePersonalDiscount { get; set; } = true;
+        
+        public int LoyaltyDiscountPercent { get; set; } // 0-10%
+        public decimal LoyaltyDiscountAmount { get; set; }
+        public decimal UserTotalSpent { get; set; } // For display
     }
 }

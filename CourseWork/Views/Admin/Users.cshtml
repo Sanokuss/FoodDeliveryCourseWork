@@ -39,6 +39,7 @@
                     <th>Email</th>
                     <th>Повне ім'я</th>
                     <th>Адреса</th>
+                    <th>Знижка</th>
                     <th>Ролі</th>
                     <th>Дії</th>
                 </tr>
@@ -48,11 +49,18 @@
                 {
                     var roles = userRoles?.ContainsKey(user.Id) == true ? userRoles[user.Id] : new List<string>();
                     var isAdmin = roles.Contains("Admin");
+                    var discountPercent = Math.Min(10, (int)(user.TotalSpent / 1000));
                     <tr>
                         <td>@user.Id</td>
                         <td>@user.Email</td>
                         <td>@(user.FullName ?? "Не вказано")</td>
                         <td>@(user.Address ?? "Не вказано")</td>
+                        <td>
+                            <span class="badge @(discountPercent >= 10 ? "bg-success" : discountPercent >= 5 ? "bg-primary" : discountPercent >= 1 ? "bg-info" : "bg-secondary")">
+                                @discountPercent%
+                            </span>
+                            <small class="text-muted d-block">@user.TotalSpent.ToString("N0") ₴</small>
+                        </td>
                         <td>
                             @if (roles.Contains("Admin"))
                             {

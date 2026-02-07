@@ -240,7 +240,7 @@ namespace CourseWork.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditUser(string id, string fullName)
+        public async Task<IActionResult> EditUser(string id, string fullName, decimal totalSpent)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
@@ -249,11 +249,13 @@ namespace CourseWork.Controllers
             }
 
             user.FullName = fullName;
+            user.TotalSpent = totalSpent;
             var result = await _userManager.UpdateAsync(user);
 
             if (result.Succeeded)
             {
-                TempData["Success"] = "Дані користувача оновлено!";
+                int discountPercent = Math.Min(10, (int)(totalSpent / 1000));
+                TempData["Success"] = $"Дані користувача оновлено! Знижка: {discountPercent}%";
                 return RedirectToAction("Users");
             }
 
