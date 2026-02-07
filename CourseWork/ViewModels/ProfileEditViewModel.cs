@@ -15,5 +15,8 @@ namespace CourseWork.ViewModels
         [Display(Name = "Номер телефону")]
         [Phone(ErrorMessage = "Це не схоже на телефон... 📱")]
         public string? PhoneNumber { get; set; }
+
+        [Display(Name = "Фото профілю")]
+        public Microsoft.AspNetCore.Http.IFormFile? ProfilePicture { get; set; }
     }
 }

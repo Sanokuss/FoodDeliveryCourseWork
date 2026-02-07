@@ -26,6 +26,15 @@
         position: relative !important;
     }
 
+    /* Ensure drawers are not clipped */
+    .cart-sidebar,
+    .mobile-drawer,
+    .cart-sidebar-overlay,
+    .mobile-drawer-overlay {
+        position: fixed !important;
+        /* z-index is handled in their specific css */
+    }
+
     #themeToggle svg {
         width: 20px !important;
         height: 20px !important;

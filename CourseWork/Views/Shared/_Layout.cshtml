@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var currentUser = User.Identity?.IsAuthenticated == true ? await UserManager.GetUserAsync(User) : null;
+}
+<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="utf-8" />
@@ -78,14 +83,30 @@
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <!-- Desktop Profile Button -->
-                    <a asp-controller="Profile" asp-action="Index" class="btn-login profile-btn d-none d-md-flex">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <a asp-controller="Profile" asp-action="Index" class="btn-login profile-btn d-none d-md-flex p-1 pe-3">
+                        @if (!string.IsNullOrEmpty(currentUser?.ProfilePictureUrl))
+                        {
+                            <img src="@currentUser.ProfilePictureUrl" alt="Avatar" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover; border: 2px solid white;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle me-2 bg-primary d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            </div>
+                        }
                         @(User.IsInRole("Admin") ? "Кабінет" : "Мій кабінет")
                     </a>
                     
                     <!-- Mobile Profile Icon (NEW) -->
-                    <a asp-controller="Profile" asp-action="Index" class="nav-cart-btn d-md-none ms-2" style="border-radius: 50%; width: 40px; height: 40px;">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <a asp-controller="Profile" asp-action="Index" class="nav-cart-btn d-md-none ms-2" style="border-radius: 50%; width: 40px; height: 40px; overflow: hidden; padding: 0;">
+                        @if (!string.IsNullOrEmpty(currentUser?.ProfilePictureUrl))
+                        {
+                            <img src="@currentUser.ProfilePictureUrl" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        }
                     </a>
                 }
                 else
@@ -117,8 +138,15 @@
             @if (User.Identity?.IsAuthenticated == true)
             {
                  <div class="d-flex align-items-center gap-3">
-                    <div class="drawer-user-avatar">
-                        <span style="font-size: 1.5rem;">👤</span>
+                    <div class="drawer-user-avatar overflow-hidden" style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center;">
+                        @if (!string.IsNullOrEmpty(currentUser?.ProfilePictureUrl))
+                        {
+                            <img src="@currentUser.ProfilePictureUrl" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <span style="font-size: 1.5rem; color: white;">👤</span>
+                        }
                     </div>
                     <div>
                         <div class="fw-bold">@User.Identity.Name</div>

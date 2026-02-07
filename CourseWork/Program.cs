@@ -121,9 +121,7 @@ namespace CourseWork
             {
                 // Local Development
                 var localConn = configuration.GetConnectionString("DefaultConnection");
-                // If local config is standard postgres but user might not have it, we could try/catch or just force InMemory for now if requested.
-                // Assuming user wants InMemory for simplicity as per request "just run locally".
-                return "InMemory"; 
+                return localConn ?? "InMemory"; 
             }
 
             // Parse the DATABASE_URL (postgres://user:password@host:port/database)

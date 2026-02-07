@@ -14,7 +14,14 @@
     <!-- Header Card -->
     <div class="profile-header">
         <div class="profile-avatar">
-            <span class="avatar-initials">@(user?.FullName?.Substring(0, 1).ToUpper() ?? "U")</span>
+            @if (!string.IsNullOrEmpty(user?.ProfilePictureUrl))
+            {
+                <img src="@user.ProfilePictureUrl" alt="@user.FullName" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; font-size: 0;" />
+            }
+            else
+            {
+                <span class="avatar-initials">@(user?.FullName?.Substring(0, 1).ToUpper() ?? "U")</span>
+            }
         </div>
         <div class="profile-info">
             <h1>@(user?.FullName ?? "Користувач")</h1>

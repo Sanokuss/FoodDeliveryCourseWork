@@ -8,6 +8,8 @@ namespace CourseWork.Models
         public string? Address { get; set; }
         [System.ComponentModel.DataAnnotations.Schema.Column(TypeName = "decimal(18,2)")]
         public decimal TotalSpent { get; set; } = 0;
+        
+        public string? ProfilePictureUrl { get; set; }
     }
 }
 

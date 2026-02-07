@@ -409,3 +409,53 @@
         text-align: center;
     }
 }
+
+/* Sorting Panel Styles */
+.sort-form-container {
+    background: var(--surface-color);
+    padding: 8px 16px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    /* Stronger shadow */
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    /* More visible border */
+    max-width: 100%;
+    transition: all 0.3s ease;
+}
+
+.sort-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+    margin-right: 0.5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.sort-select {
+    width: auto;
+    cursor: pointer;
+    color: var(--primary-color);
+    padding-right: 30px;
+    min-width: 180px;
+}
+
+@media (max-width: 480px) {
+    .sort-form-container {
+        padding: 6px 12px;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .sort-label {
+        display: none;
+        /* Hide label to save space */
+    }
+
+    .sort-select {
+        min-width: 0 !important;
+        width: 100% !important;
+        font-size: 0.9rem;
+    }
+}

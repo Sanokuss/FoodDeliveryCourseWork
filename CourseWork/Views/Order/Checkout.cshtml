@@ -178,7 +178,7 @@
             if (!toggle) return;
 
             // cartTotal is the ORIGINAL total before any discount
-            const cartTotal = @((Model.TotalAmount + Model.LoyaltyDiscountAmount).ToString(System.Globalization.CultureInfo.InvariantCulture));
+            const cartTotal = @((Model.TotalAmount + Model.DiscountAmount).ToString(System.Globalization.CultureInfo.InvariantCulture));
             const discountAmount = @(Model.LoyaltyDiscountAmount.ToString(System.Globalization.CultureInfo.InvariantCulture));
             const discountPercent = @Model.LoyaltyDiscountPercent;
 

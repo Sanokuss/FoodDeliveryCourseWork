@@ -35,6 +35,7 @@
         <table class="table table-striped">
             <thead>
                 <tr>
+                    <th>Фото</th>
                     <th>ID</th>
                     <th>Email</th>
                     <th>Повне ім'я</th>
@@ -51,6 +52,18 @@
                     var isAdmin = roles.Contains("Admin");
                     var discountPercent = Math.Min(10, (int)(user.TotalSpent / 1000));
                     <tr>
+                        <td>
+                            @if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                            {
+                                <img src="@user.ProfilePictureUrl" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover; border: 1px solid #ddd;" />
+                            }
+                            else
+                            {
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+                                    👤
+                                </div>
+                            }
+                        </td>
                         <td>@user.Id</td>
                         <td>@user.Email</td>
                         <td>@(user.FullName ?? "Не вказано")</td>

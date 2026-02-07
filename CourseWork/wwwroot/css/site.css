@@ -268,10 +268,17 @@ body::before {
     display: none;
 }
 
-a {
+a,
+button,
+input,
+label,
+select,
+textarea {
     text-decoration: none;
     color: inherit;
     transition: var(--transition);
+    touch-action: manipulation;
+    /* Prevent double-tap zoom */
 }
 
 ul {

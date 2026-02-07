@@ -60,17 +60,15 @@
     <!-- Products -->
     <div>
         <!-- Sorting Bar (Centered & Styled) -->
-        <div class="d-flex justify-content-center mb-4 pb-2">
-             <form method="get" asp-action="Index" id="sortForm" class="d-flex align-items-center"
-                   style="background: var(--surface-color); padding: 8px 16px; border-radius: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.03);">
+        <div class="d-flex justify-content-center justify-content-md-end mb-4 pb-2">
+             <form method="get" asp-action="Index" id="sortForm" class="d-flex align-items-center sort-form-container">
                 
                 <input type="hidden" name="searchTerm" value="@ViewBag.SearchTerm" />
                 <input type="hidden" name="categoryId" value="@ViewBag.SelectedCategoryId" />
                 
-                <label class="me-2 text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Сортувати:</label>
-                <select name="sortOrder" class="form-select form-select-sm border-0 bg-transparent shadow-none fw-bold" 
-                        onchange="document.getElementById('sortForm').submit()" 
-                        style="width: auto; cursor: pointer; color: var(--primary-color); padding-right: 30px; min-width: 180px;">
+                <label class="sort-label">Сортувати:</label>
+                <select name="sortOrder" class="form-select form-select-sm border-0 bg-transparent shadow-none fw-bold sort-select" 
+                        onchange="document.getElementById('sortForm').submit()">
                     <!option value="" @(ViewBag.CurrentSort == null ? "selected" : "")>За замовчуванням</!option>
                     <!option value="price_asc" @(ViewBag.CurrentSort == "price_asc" ? "selected" : "")>Від дешевшого до дорожчого</!option>
                     <!option value="price_desc" @(ViewBag.CurrentSort == "price_desc" ? "selected" : "")>Від дорожчого до дешевшого</!option>
@@ -102,6 +100,12 @@
                     
                     // Initialize and show modal
                     const modalElement = document.getElementById('productDetailsModal');
+                    
+                    // ACCESSIBILITY FIX: Remove aria-hidden before showing, set aria-modal
+                    modalElement.removeAttribute('aria-hidden');
+                    modalElement.setAttribute('aria-modal', 'true');
+                    modalElement.setAttribute('role', 'dialog');
+
                     const modal = new bootstrap.Modal(modalElement);
                     modal.show();
                     

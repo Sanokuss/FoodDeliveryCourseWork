@@ -13,15 +13,18 @@ namespace CourseWork.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IOrderRepository _orderRepository;
         private readonly IRepository<Promotion> _promotionRepository;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
         public ProfileController(
             UserManager<ApplicationUser> userManager,
             IOrderRepository orderRepository,
-            IRepository<Promotion> promotionRepository)
+            IRepository<Promotion> promotionRepository,
+            IWebHostEnvironment hostEnvironment)
         {
             _userManager = userManager;
             _orderRepository = orderRepository;
             _promotionRepository = promotionRepository;
+            _hostEnvironment = hostEnvironment;
         }
 
         public async Task<IActionResult> Index()
@@ -103,6 +106,35 @@ namespace CourseWork.Controllers
             if (user == null)
             {
                 return RedirectToAction("Login", "Account");
+            }
+
+            // Handle Profile Picture
+            if (model.ProfilePicture != null)
+            {
+                string wwwRootPath = _hostEnvironment.WebRootPath;
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ProfilePicture.FileName);
+                string productPath = Path.Combine(wwwRootPath, @"images\profiles");
+
+                if (!Directory.Exists(productPath))
+                {
+                    Directory.CreateDirectory(productPath);
+                }
+
+                // Delete old image if exists
+                if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                {
+                    var oldImagePath = Path.Combine(wwwRootPath, user.ProfilePictureUrl.TrimStart('\\'));
+                    if (System.IO.File.Exists(oldImagePath))
+                    {
+                        System.IO.File.Delete(oldImagePath);
+                    }
+                }
+
+                using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+                {
+                    await model.ProfilePicture.CopyToAsync(fileStream);
+                }
+                user.ProfilePictureUrl = @"\images\profiles\" + fileName;
             }
 
             user.FullName = model.FullName;

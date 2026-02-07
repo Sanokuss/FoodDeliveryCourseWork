@@ -205,3 +205,48 @@
 .modal.show .modal-dialog {
     transform: scale(1) translateY(0);
 }
+
+/* Mobile adjustments for product modal */
+@media (max-width: 768px) {
+    .product-modal-img-wrapper {
+        min-height: 250px;
+        height: 250px;
+    }
+
+    .modal-details-content {
+        padding: 24px;
+        /* Ensure content doesn't overflow or get cut off */
+        height: auto;
+        /* Add extra padding at bottom to fully reveal the button */
+        padding-bottom: 80px;
+    }
+
+    /* Stack footer actions vertically */
+    .modal-footer-actions {
+        flex-direction: column;
+        gap: 20px;
+        align-items: center !important;
+    }
+
+    .modal-footer-actions>div {
+        /* Price container */
+        width: 100%;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        margin-bottom: 0 !important;
+    }
+
+    .modal-footer-actions form {
+        width: 100%;
+        justify-content: center;
+        gap: 16px !important;
+    }
+
+    .modal-footer-actions .btn-primary {
+        flex: 1;
+        /* Stretch button */
+    }
+}
